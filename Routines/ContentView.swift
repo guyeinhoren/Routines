@@ -120,3 +120,13 @@ struct ContentView: View {
         #endif
     }
 }
+
+#if DEBUG
+#Preview("Hebrew") {
+    ContentView()
+        .modelContainer(PreviewData.container)
+        .environment(\.locale, Locale(identifier: "he_IL"))
+        .environment(\.layoutDirection, .rightToLeft)
+        .frame(width: 980, height: 600)
+}
+#endif

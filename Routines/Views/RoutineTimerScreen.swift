@@ -83,8 +83,10 @@ struct RoutineTimerScreen: View {
                 .font(.title2.weight(.semibold))
                 .multilineTextAlignment(.center)
 
-            if !routine.details.isEmpty {
-                Text(routine.details)
+            if routine.hasDetails {
+                // The rich version, so any formatting the person applied in the
+                // editor carries through to the screen they actually stare at.
+                Text(routine.richDetails)
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
                     .multilineTextAlignment(.center)
@@ -186,3 +188,11 @@ struct RoutineTimerScreen: View {
         RoutineStore.recordRepetition(routine, on: dayTracker.today, in: context)
     }
 }
+
+#if DEBUG
+#Preview {
+    RoutineTimerScreen(routine: PreviewData.sampleRoutine)
+        .environment(DayTracker())
+        .modelContainer(PreviewData.container)
+}
+#endif

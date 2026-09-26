@@ -48,11 +48,13 @@ struct SymbolPickerView: View {
                 .font(.title3)
                 .foregroundStyle(isSelected ? .white : tint)
                 .frame(width: cellSize, height: cellSize)
-                .background(isSelected ? AnyShapeStyle(tint) : AnyShapeStyle(.fill.tertiary))
+                .background(isSelected ? AnyShapeStyle(tint) : AnyShapeStyle(.quaternary))
                 .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
         }
         .buttonStyle(.plain)
-        .accessibilityLabel(name)
+        // Symbol names are dot-separated identifiers; spaces let VoiceOver read
+        // them as words instead of spelling out the punctuation.
+        .accessibilityLabel(name.replacingOccurrences(of: ".", with: " "))
         .accessibilityAddTraits(isSelected ? [.isButton, .isSelected] : [.isButton])
     }
 }

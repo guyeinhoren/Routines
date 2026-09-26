@@ -22,6 +22,10 @@ final class RoutineList {
     /// Position on the root screen, kept dense and 0-based.
     var sortIndex: Int = 0
 
+    /// Whether the list sits as a tile at the top of the root screen, the way
+    /// Reminders shows pinned lists, rather than in the list below.
+    var isPinned: Bool = false
+
     var createdAt: Date = Date()
 
     /// Nullify rather than cascade: deleting a list shouldn't take a routine's

@@ -86,9 +86,10 @@ struct ActivityHeatmap: View {
                 Text(day.formatted(.dateTime.weekday(.narrow).locale(locale)))
                     .font(.caption2)
                     .foregroundStyle(.secondary)
-                    .frame(maxWidth: .infinity)
+                    .frame(maxWidth: 34)
             }
         }
+        .frame(maxWidth: .infinity)
         .accessibilityHidden(true)
     }
 
@@ -118,8 +119,9 @@ struct ActivityHeatmap: View {
     // MARK: - Grid
 
     private var grid: some View {
-        LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 4), count: 7), spacing: 4) {
-            ForEach(Array(cells.enumerated()), id: \.offset) { _, day in
+        // Eager, not lazy: this sits in a list row. See `FixedColumnGrid`.
+        FixedColumnGrid(items: cells, columns: 7) { day in
+            Group {
                 if let day {
                     cell(for: day)
                 } else {
@@ -128,7 +130,12 @@ struct ActivityHeatmap: View {
                         .aspectRatio(1, contentMode: .fit)
                 }
             }
+            // Capped so the squares stay graph-sized. Left uncapped they
+            // stretch to fill a Mac or iPad window and stop reading as a
+            // contribution graph.
+            .frame(maxWidth: 34)
         }
+        .frame(maxWidth: .infinity)
     }
 
     /// The month's days, preceded by blanks so the first lands on its weekday.

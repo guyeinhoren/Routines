@@ -96,15 +96,14 @@ struct RoutineHistoryCalendar: View {
     // MARK: - Grid
 
     private var monthGrid: some View {
-        LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 4), count: 7), spacing: 4) {
-            ForEach(Array(cells.enumerated()), id: \.offset) { _, day in
-                if let day {
-                    cell(for: day)
-                } else {
-                    // Keeps the first of the month under the right weekday.
-                    Color.clear
-                        .aspectRatio(1, contentMode: .fit)
-                }
+        // Eager, not lazy: this sits in a form row. See `FixedColumnGrid`.
+        FixedColumnGrid(items: cells, columns: 7) { day in
+            if let day {
+                cell(for: day)
+            } else {
+                // Keeps the first of the month under the right weekday.
+                Color.clear
+                    .aspectRatio(1, contentMode: .fit)
             }
         }
     }

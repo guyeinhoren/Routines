@@ -22,7 +22,7 @@ struct MacSettingsView: View {
                 }
             } footer: {
                 Text(
-                    "When a workout ends, an event with the tag's name is added at the time the workout started.",
+                    "When a workout ends, an event with the list's name is added at the time the workout started.",
                     comment: "Explains the calendar preference"
                 )
             }

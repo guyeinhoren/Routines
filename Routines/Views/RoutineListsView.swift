@@ -12,7 +12,13 @@ import SwiftUI
 /// and anything pinned, then the remaining lists below. A long press on a list
 /// pins or unpins it.
 struct RoutineListsView: View {
-    @Binding var path: [ListDestination]
+    /// The destination showing beside the sidebar on the Mac, so the matching
+    /// row or tile can be highlighted. Always `nil` on iPhone, where lists are
+    /// pushed rather than shown alongside.
+    @Binding var selection: ListDestination?
+
+    /// Opens a list — pushing it on iPhone, selecting it on the Mac.
+    let open: (ListDestination) -> Void
 
     @Environment(\.modelContext) private var context
     @Environment(DayTracker.self) private var dayTracker
@@ -42,12 +48,123 @@ struct RoutineListsView: View {
     }
 
     var body: some View {
+        container
+            .navigationTitle(Text("Routines", comment: "Main screen title"))
+            .overlay {
+                if lists.isEmpty, routines.isEmpty {
+                    emptyState
+                }
+            }
+            .toolbar {
+                // The Mac keeps "Add List" at the foot of the sidebar instead,
+                // where Reminders puts it.
+                #if !os(macOS)
+                ToolbarItem(placement: .primaryAction) {
+                    Button {
+                        editorTarget = .new
+                    } label: {
+                        Label {
+                            Text("New List", comment: "List editor title when creating")
+                        } icon: {
+                            Image(systemName: "plus")
+                        }
+                    }
+                }
+                #endif
+            }
+            .sheet(item: $editorTarget) { target in
+                RoutineListEditorView(target: target)
+            }
+            .confirmationDialog(
+                Text("Delete List?", comment: "Title of the list delete confirmation"),
+                isPresented: $isConfirmingDeletion,
+                titleVisibility: .visible,
+                presenting: listPendingDeletion
+            ) { list in
+                Button(role: .destructive) {
+                    delete(list)
+                } label: {
+                    Text("Delete “\(list.name)”", comment: "Confirm deleting a named routine")
+                }
+            } message: { _ in
+                Text(
+                    "Its routines are kept and stay available under All.",
+                    comment: "Reassures that deleting a list doesn't delete routines"
+                )
+            }
+            .task {
+                workout.restoreActiveSession(in: context)
+                await dayTracker.run()
+            }
+    }
+
+    /// A selectable sidebar on the Mac; a plain grouped list on iPhone, where
+    /// rows push rather than select.
+    @ViewBuilder private var container: some View {
+        #if os(macOS)
+        List(selection: $selection) {
+            listContent
+        }
+        .listStyle(.sidebar)
+        .safeAreaInset(edge: .bottom, spacing: 0) {
+            addListButton
+        }
+        #else
         List {
+            listContent
+        }
+        #endif
+    }
+
+    #if os(macOS)
+    private var addListButton: some View {
+        Button {
+            editorTarget = .new
+        } label: {
+            Label {
+                Text("Add List", comment: "Sidebar button that creates a list")
+            } icon: {
+                Image(systemName: "plus.circle")
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .contentShape(.rect)
+        }
+        .buttonStyle(.plain)
+        .foregroundStyle(.secondary)
+        .padding(.horizontal, 16)
+        .padding(.vertical, 10)
+    }
+    #endif
+
+    private var emptyState: some View {
+        ContentUnavailableView {
+            Label {
+                Text("No Lists", comment: "Empty state title for lists")
+            } icon: {
+                Image(systemName: "list.bullet")
+            }
+        } description: {
+            Text(
+                "Make a list for each kind of routine — strength, stretching, whatever you keep up.",
+                comment: "Empty state description for lists"
+            )
+        } actions: {
+            Button {
+                editorTarget = .new
+            } label: {
+                Text("New List", comment: "List editor title when creating")
+            }
+            .buttonStyle(.borderedProminent)
+        }
+    }
+
+    @ViewBuilder private var listContent: some View {
             Section {
                 tileGrid
             }
             .listRowInsets(EdgeInsets())
             .listRowBackground(Color.clear)
+            .listRowSeparator(.hidden)
 
             if !unpinnedLists.isEmpty || unassignedCount > 0 {
                 Section {
@@ -96,114 +213,92 @@ struct RoutineListsView: View {
                     }
                 }
             }
-        }
-        .navigationTitle(Text("Routines", comment: "Main screen title"))
-        .overlay {
-            if lists.isEmpty, routines.isEmpty {
-                ContentUnavailableView {
-                    Label {
-                        Text("No Lists", comment: "Empty state title for lists")
-                    } icon: {
-                        Image(systemName: "list.bullet")
-                    }
-                } description: {
-                    Text(
-                        "Make a list for each kind of routine — strength, stretching, whatever you keep up.",
-                        comment: "Empty state description for lists"
-                    )
-                } actions: {
-                    Button {
-                        editorTarget = .new
-                    } label: {
-                        Text("New List", comment: "List editor title when creating")
-                    }
-                    .buttonStyle(.borderedProminent)
-                }
-            }
-        }
-        .toolbar {
-            ToolbarItem(placement: .primaryAction) {
-                Button {
-                    editorTarget = .new
-                } label: {
-                    Label {
-                        Text("New List", comment: "List editor title when creating")
-                    } icon: {
-                        Image(systemName: "plus")
-                    }
-                }
-            }
-        }
-        .sheet(item: $editorTarget) { target in
-            RoutineListEditorView(target: target)
-        }
-        .confirmationDialog(
-            Text("Delete List?", comment: "Title of the list delete confirmation"),
-            isPresented: $isConfirmingDeletion,
-            titleVisibility: .visible,
-            presenting: listPendingDeletion
-        ) { list in
-            Button(role: .destructive) {
-                delete(list)
-            } label: {
-                Text("Delete “\(list.name)”", comment: "Confirm deleting a named routine")
-            }
-        } message: { _ in
-            Text(
-                "Its routines are kept and stay available under All.",
-                comment: "Reassures that deleting a list doesn't delete routines"
-            )
-        }
-        .task {
-            workout.restoreActiveSession(in: context)
-            await dayTracker.run()
-        }
     }
 
     // MARK: - Tiles
 
     /// All, followed by every pinned list, two to a row.
+    ///
+    /// A plain `Grid` rather than `LazyVGrid`. A lazy grid sizes itself from the
+    /// width it's offered, while a Mac sidebar row sizes itself from its
+    /// content; inside a sidebar the two kept re-measuring each other until
+    /// AppKit gave up and crashed the app. There are only ever a few tiles, so
+    /// laziness buys nothing here.
     private var tileGrid: some View {
-        LazyVGrid(
-            columns: [GridItem(.flexible(), spacing: 10), GridItem(.flexible(), spacing: 10)],
-            spacing: 10
-        ) {
+        let tiles: [RoutineList?] = [nil] + pinnedLists.map(Optional.some)
+        let rows = stride(from: 0, to: tiles.count, by: 2).map { Array(tiles[$0..<min($0 + 2, tiles.count)]) }
+
+        return Grid(horizontalSpacing: 10, verticalSpacing: 10) {
+            ForEach(rows.indices, id: \.self) { rowIndex in
+                GridRow {
+                    ForEach(rows[rowIndex].indices, id: \.self) { column in
+                        tile(for: rows[rowIndex][column])
+                    }
+                    // An odd tile out still takes only half the width.
+                    if rows[rowIndex].count == 1 {
+                        Color.clear
+                            .gridCellUnsizedAxes([.horizontal, .vertical])
+                    }
+                }
+            }
+        }
+        #if os(macOS)
+        // A sidebar row has no insets of its own here, so the tiles would
+        // otherwise run to the sidebar's edges.
+        .padding(.horizontal, 10)
+        .padding(.vertical, 6)
+        #endif
+        .animation(.snappy, value: pinnedLists.map(\.persistentModelID))
+    }
+
+    /// One tile: All when `list` is `nil`, otherwise that pinned list.
+    @ViewBuilder private func tile(for list: RoutineList?) -> some View {
+        if let list {
+            let destination = ListDestination.list(list.persistentModelID)
+            tileButton(to: destination) {
+                ListTile(
+                    title: Text(list.name),
+                    symbolName: list.symbolName,
+                    tint: list.color,
+                    count: list.routineCount,
+                    isSelected: selection == destination
+                )
+            }
+            .contextMenu {
+                listActions(for: list)
+            }
+        } else {
             tileButton(to: .all) {
                 ListTile(
                     title: Text("All", comment: "The entry covering every routine"),
                     symbolName: "tray.full.fill",
                     tint: .gray,
-                    count: routines.count
+                    count: routines.count,
+                    isSelected: selection == .all
                 )
             }
-
-            ForEach(pinnedLists) { list in
-                tileButton(to: .list(list.persistentModelID)) {
-                    ListTile(
-                        title: Text(list.name),
-                        symbolName: list.symbolName,
-                        tint: list.color,
-                        count: list.routineCount
-                    )
-                }
-                .contextMenu {
-                    listActions(for: list)
-                }
-            }
         }
-        .animation(.snappy, value: pinnedLists.map(\.persistentModelID))
     }
 
-    /// Tiles push onto the path directly. Several `NavigationLink`s sharing one
+    /// Tiles open their list directly. Several `NavigationLink`s sharing one
     /// list row would all respond to a tap on any of them; plain buttons each
     /// keep their own hit area.
     private func tileButton(to destination: ListDestination, @ViewBuilder label: () -> some View) -> some View {
         Button {
-            path.append(destination)
+            open(destination)
         } label: {
             label()
         }
         .buttonStyle(.plain)
+    }
+
+    /// Mac sidebars use smaller symbols than an iPhone list, as Reminders does.
+    private var rowSymbolSize: CGFloat {
+        #if os(macOS)
+        22
+        #else
+        28
+        #endif
     }
 
     // MARK: - Rows
@@ -217,7 +312,7 @@ struct RoutineListsView: View {
             Label {
                 Text(list.name)
             } icon: {
-                ListSymbol(symbolName: list.symbolName, tint: list.color, size: 28)
+                ListSymbol(symbolName: list.symbolName, tint: list.color, size: rowSymbolSize)
             }
         }
     }
@@ -296,6 +391,7 @@ private struct ListSymbol: View {
     let symbolName: String
     let tint: Color
     let size: CGFloat
+    var glyph: Color = .white
 
     var body: some View {
         ZStack {
@@ -304,7 +400,7 @@ private struct ListSymbol: View {
 
             Image(systemName: symbolName)
                 .font(.system(size: size * 0.45, weight: .semibold))
-                .foregroundStyle(.white)
+                .foregroundStyle(glyph)
         }
         .frame(width: size, height: size)
         .accessibilityHidden(true)
@@ -319,36 +415,67 @@ private struct ListTile: View {
     let tint: Color
     let count: Int
 
+    /// Whether this tile's list is the one showing beside the sidebar. Mac
+    /// Reminders fills a selected tile with its colour; iPhone never selects.
+    var isSelected = false
+
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             HStack(alignment: .top) {
-                ListSymbol(symbolName: symbolName, tint: tint, size: 32)
+                // Inverted when selected, so the symbol stays visible against a
+                // background of its own colour.
+                ListSymbol(
+                    symbolName: symbolName,
+                    tint: isSelected ? .white : tint,
+                    size: symbolSize,
+                    glyph: isSelected ? tint : .white
+                )
 
                 Spacer(minLength: 4)
 
                 Text(count, format: .number)
-                    .font(.title.weight(.bold))
+                    .font(countFont)
                     .fontDesign(.rounded)
                     .monospacedDigit()
+                    .foregroundStyle(isSelected ? AnyShapeStyle(.white) : AnyShapeStyle(.primary))
             }
 
             title
                 .font(.subheadline.weight(.semibold))
-                .foregroundStyle(.secondary)
+                .foregroundStyle(isSelected ? AnyShapeStyle(.white) : AnyShapeStyle(.secondary))
                 .lineLimit(1)
         }
-        .padding(12)
+        .padding(tilePadding)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(tileBackground, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
-        .contentShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+        .background(
+            isSelected ? tint : tileBackground,
+            in: RoundedRectangle(cornerRadius: 10, style: .continuous)
+        )
+        .contentShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
         .accessibilityElement(children: .combine)
+        .accessibilityAddTraits(isSelected ? [.isButton, .isSelected] : [.isButton])
     }
+
+    // A Mac sidebar is narrower than an iPhone screen, so its tiles are
+    // tighter — close to the proportions of Reminders' own.
+    #if os(macOS)
+    private let symbolSize: CGFloat = 26
+    private let tilePadding: CGFloat = 8
+    private let countFont = Font.title2.weight(.bold)
+    #else
+    private let symbolSize: CGFloat = 32
+    private let tilePadding: CGFloat = 12
+    private let countFont = Font.title.weight(.bold)
+    #endif
 
     /// The colour a grouped list gives its rows, so a tile reads as a cell
     /// lifted off the background rather than a separate kind of control.
     private var tileBackground: Color {
         #if os(macOS)
-        Color(nsColor: .controlBackgroundColor)
+        // The Mac's control background matches the window, so a tile drawn
+        // with it vanishes; a faint tint of the text colour stays visible in
+        // both appearances.
+        Color.primary.opacity(0.06)
         #else
         Color(uiColor: .secondarySystemGroupedBackground)
         #endif

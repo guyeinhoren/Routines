@@ -34,7 +34,7 @@ enum PreviewData {
     /// The root screen, wired up with the controllers it expects.
     static var root: some View {
         NavigationStack {
-            RoutineListsView()
+            RoutineListsView(selection: .constant(nil), open: { _ in })
         }
         .environment(DayTracker())
         .environment(WorkoutController())
@@ -78,6 +78,8 @@ enum PreviewData {
             colorIdentifier: RoutineColor.red.rawValue,
             sortIndex: 1
         )
+        // One pinned, one not, so the root preview shows both a tile and a row.
+        morning.isPinned = true
         context.insert(morning)
         context.insert(strength)
 

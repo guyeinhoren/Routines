@@ -98,6 +98,7 @@ struct RoutineListEditorView: View {
                     Text("Color", comment: "Label above the colour swatches")
                 }
             }
+            .formStyle(.grouped)
             .navigationTitle(navigationTitle)
             #if !os(macOS)
             .navigationBarTitleDisplayMode(.inline)
@@ -139,28 +140,7 @@ struct RoutineListEditorView: View {
     }
 
     private var colorGrid: some View {
-        LazyVGrid(columns: [GridItem(.adaptive(minimum: 40), spacing: 10)], spacing: 10) {
-            ForEach(RoutineColor.allCases) { option in
-                Button {
-                    color = option
-                } label: {
-                    Circle()
-                        .fill(option.color)
-                        .frame(width: 28, height: 28)
-                        .overlay {
-                            if option == color {
-                                Image(systemName: "checkmark")
-                                    .font(.caption.weight(.bold))
-                                    .foregroundStyle(.white)
-                            }
-                        }
-                }
-                .buttonStyle(.plain)
-                .accessibilityLabel(Text(option.displayName))
-                .accessibilityAddTraits(option == color ? [.isButton, .isSelected] : [.isButton])
-            }
-        }
-        .padding(.vertical, 4)
+        ColorSwatchGrid(selection: $color)
     }
 
     private func save() {

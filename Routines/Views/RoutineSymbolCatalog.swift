@@ -13,8 +13,8 @@ import Foundation
 enum RoutineSymbolCatalog {
     static let all: [String] = [
         // General
-        "checkmark.circle.fill", "star.fill", "heart.fill", "flame.fill",
-        "bolt.fill", "sparkles", "target", "flag.fill",
+        "repeat", "checkmark.circle.fill", "star.fill", "heart.fill",
+        "flame.fill", "bolt.fill", "sparkles", "target", "flag.fill",
 
         // Movement
         "figure.run", "figure.walk", "figure.yoga", "figure.cooldown",

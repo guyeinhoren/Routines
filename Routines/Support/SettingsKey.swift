@@ -17,6 +17,10 @@ enum SettingsKey {
     /// Whether a finished timer counts as one completed repetition.
     static let timerCountsAsCompletion = "timerCountsAsCompletion"
 
+    /// The list that was open when the app was last left, so the next launch
+    /// reopens it. Not a preference, so it has no entry in `Settings.bundle`.
+    static let lastOpenedList = "lastOpenedList"
+
     /// Default values for keys the person has never touched.
     ///
     /// A `Settings.bundle` only writes its declared defaults once the settings

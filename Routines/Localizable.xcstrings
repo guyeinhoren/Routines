@@ -89,6 +89,17 @@
         }
       }
     },
+    "Add List" : {
+      "comment" : "Sidebar button that creates a list",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "הוספת רשימה"
+          }
+        }
+      }
+    },
     "Add Photo" : {
       "comment" : "Row that opens the photo picker",
       "localizations" : {
@@ -101,7 +112,7 @@
       }
     },
     "Add Routine" : {
-      "comment" : "Toolbar button that creates a routine",
+      "comment" : "Empty state action\nToolbar button that creates a routine",
       "localizations" : {
         "he" : {
           "stringUnit" : {
@@ -209,7 +220,7 @@
       }
     },
     "Complete" : {
-      "comment" : "Accessibility value for a fully completed day, and shown in the timer when the countdown ends",
+      "comment" : "Accessibility value for a fully completed day\nShown in the timer when the countdown ends",
       "localizations" : {
         "he" : {
           "stringUnit" : {
@@ -230,7 +241,7 @@
       }
     },
     "Delete" : {
-      "comment" : "Swipe action and delete confirmation",
+      "comment" : "Confirms deletion\nSwipe action",
       "localizations" : {
         "he" : {
           "stringUnit" : {
@@ -241,7 +252,7 @@
       }
     },
     "Delete “%@”" : {
-      "comment" : "Confirm deleting a named routine or list",
+      "comment" : "Confirm deleting a named routine",
       "localizations" : {
         "he" : {
           "stringUnit" : {
@@ -296,7 +307,7 @@
       }
     },
     "Done" : {
-      "comment" : "Saves changes and dismisses a sheet",
+      "comment" : "Dismisses the finished timer\nDismisses the symbol picker\nSaves changes to a routine",
       "localizations" : {
         "he" : {
           "stringUnit" : {
@@ -318,7 +329,7 @@
       }
     },
     "Duration" : {
-      "comment" : "Resulting total duration, and VoiceOver label for the duration picker",
+      "comment" : "Resulting total duration\nVoiceOver label for the duration picker",
       "localizations" : {
         "he" : {
           "stringUnit" : {
@@ -459,7 +470,7 @@
       }
     },
     "List" : {
-      "comment" : "The routine's list, and the list editor's title when editing",
+      "comment" : "List editor title when editing\nRow that chooses the routine's list",
       "localizations" : {
         "he" : {
           "stringUnit" : {
@@ -470,12 +481,23 @@
       }
     },
     "List Name" : {
-      "comment" : "Label and placeholder for a list's name",
+      "comment" : "Label for a list's name field\nPlaceholder for a list's name",
       "localizations" : {
         "he" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "שם הרשימה"
+          }
+        }
+      }
+    },
+    "List Not Found" : {
+      "comment" : "Shown when the list being viewed no longer exists",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "הרשימה לא נמצאה"
           }
         }
       }
@@ -535,7 +557,7 @@
       }
     },
     "Name" : {
-      "comment" : "Label and placeholder for a name field",
+      "comment" : "Label for the routine name field\nPlaceholder for the routine name",
       "localizations" : {
         "he" : {
           "stringUnit" : {
@@ -574,6 +596,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "החודש הבא"
+          }
+        }
+      }
+    },
+    "No List Selected" : {
+      "comment" : "Shown on the Mac before a list is chosen in the sidebar",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "לא נבחרה רשימה"
           }
         }
       }
@@ -661,6 +694,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "השהיה"
+          }
+        }
+      }
+    },
+    "Pin" : {
+      "comment" : "Shows a list as a tile at the top of the main screen",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "הצמדה"
           }
         }
       }
@@ -905,7 +949,7 @@
       }
     },
     "Symbol" : {
-      "comment" : "Title of the symbol picker and the row that opens it",
+      "comment" : "Row that opens the symbol picker\nTitle of the symbol picker",
       "localizations" : {
         "he" : {
           "stringUnit" : {
@@ -991,6 +1035,17 @@
         }
       }
     },
+    "Unpin" : {
+      "comment" : "Moves a pinned list back into My Lists",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ביטול הצמדה"
+          }
+        }
+      }
+    },
     "Upcoming" : {
       "comment" : "Accessibility value for a future day in the history calendar",
       "localizations" : {
@@ -1035,5 +1090,5 @@
       }
     }
   },
-  "version" : "1.0"
+  "version" : "1.1"
 }

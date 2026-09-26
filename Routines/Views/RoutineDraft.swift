@@ -26,31 +26,38 @@ enum RoutineEditorTarget: Identifiable {
 /// store, which would otherwise make every keystroke permanent.
 struct RoutineDraft {
     var name: String = ""
-    var details: String = ""
-    var symbolName: String = "checkmark.circle.fill"
+    var details: AttributedString = AttributedString()
+    var symbolName: String = "repeat"
     var color: RoutineColor = .fallback
     var imageData: Data?
 
     var isTimed: Bool = false
-    var durationMinutes: Int = 5
-    var durationSeconds: Int = 0
+
+    /// The whole configured length. Kept as one number so the picker owns the
+    /// split into hours, minutes and seconds.
+    var durationSeconds: Int = 300
 
     var repetitionsPerDay: Int = 1
-    var tagIDs: Set<PersistentIdentifier> = []
 
-    init() {}
+    /// The list the routine belongs to, or `nil` for none.
+    var listID: PersistentIdentifier?
+
+    init(defaultList: RoutineList? = nil) {
+        listID = defaultList?.persistentModelID
+    }
 
     init(routine: Routine) {
         name = routine.name
-        details = routine.details
+        details = routine.richDetails
         symbolName = routine.symbolName
         color = routine.routineColor
         imageData = routine.imageData
         isTimed = routine.isTimed
-        durationMinutes = routine.durationSeconds / 60
-        durationSeconds = routine.durationSeconds % 60
+        // An untimed routine keeps the default so turning the switch on offers
+        // something sensible rather than zero.
+        durationSeconds = routine.isTimed ? routine.durationSeconds : 300
         repetitionsPerDay = routine.dailyTarget
-        tagIDs = Set((routine.tags ?? []).map(\.persistentModelID))
+        listID = routine.list?.persistentModelID
     }
 
     var trimmedName: String {
@@ -65,26 +72,22 @@ struct RoutineDraft {
 
     /// The configured length in seconds, or zero when the routine is untimed.
     ///
-    /// A timed routine is clamped to at least one second: leaving both fields at
+    /// A timed routine is clamped to at least one second: leaving every wheel at
     /// zero while the Timed switch is on would otherwise silently produce an
     /// untimed routine and make the switch look broken.
     var totalDurationSeconds: Int {
         guard isTimed else { return 0 }
-        return max(1, durationMinutes * 60 + durationSeconds)
+        return max(1, durationSeconds)
     }
 
-    var durationDescription: String {
-        Duration.seconds(totalDurationSeconds).formatted(.time(pattern: .minuteSecond))
-    }
-
-    func apply(to routine: Routine, availableTags: [RoutineTag]) {
+    func apply(to routine: Routine, availableLists: [RoutineList]) {
         routine.name = trimmedName
-        routine.details = details
+        routine.setDetails(details)
         routine.symbolName = symbolName
         routine.colorIdentifier = color.rawValue
         routine.imageData = imageData
         routine.durationSeconds = totalDurationSeconds
         routine.repetitionsPerDay = max(1, repetitionsPerDay)
-        routine.tags = availableTags.filter { tagIDs.contains($0.persistentModelID) }
+        routine.list = availableLists.first { $0.persistentModelID == listID }
     }
 }

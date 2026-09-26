@@ -23,7 +23,7 @@ struct RoutineDetailView: View {
     @State private var timerRoutine: Routine?
 
     var body: some View {
-        List {
+        Form {
             headerSection
 
             if routine.imageData != nil || routine.hasDetails {
@@ -32,12 +32,13 @@ struct RoutineDetailView: View {
 
             scheduleSection
 
-            if !routine.sortedTags.isEmpty {
-                tagsSection
+            if let list = routine.list {
+                listSection(for: list)
             }
 
             historySection
         }
+        .formStyle(.grouped)
         .navigationTitle(routine.name)
         #if !os(macOS)
         .navigationBarTitleDisplayMode(.inline)
@@ -135,18 +136,16 @@ struct RoutineDetailView: View {
         }
     }
 
-    private var tagsSection: some View {
+    private func listSection(for list: RoutineList) -> some View {
         Section {
-            ForEach(routine.sortedTags) { tag in
-                Label {
-                    Text(tag.name)
-                } icon: {
-                    Image(systemName: "tag.fill")
-                        .foregroundStyle(tag.color)
-                }
+            Label {
+                Text(list.name)
+            } icon: {
+                Image(systemName: list.symbolName)
+                    .foregroundStyle(list.color)
             }
         } header: {
-            Text("Tags", comment: "Section header for tags")
+            Text("List", comment: "Row that chooses the routine's list")
         }
     }
 
@@ -189,5 +188,17 @@ struct RoutineDetailView: View {
     }
     .environment(DayTracker())
     .modelContainer(PreviewData.container)
+}
+
+// The width of the Mac inspector column, where the view actually lives there.
+#Preview("Inspector Width") {
+    NavigationStack {
+        RoutineDetailView(routine: PreviewData.sampleRoutine)
+    }
+    .environment(DayTracker())
+    .modelContainer(PreviewData.container)
+    .environment(\.locale, Locale(identifier: "he_IL"))
+    .environment(\.layoutDirection, .rightToLeft)
+    .frame(width: 340, height: 720)
 }
 #endif

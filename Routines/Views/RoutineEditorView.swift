@@ -7,8 +7,8 @@ import PhotosUI
 import SwiftData
 import SwiftUI
 
-/// Shows and edits every detail of a routine. Reached from the info button or
-/// the symbol on the main screen, and also used to create a new routine.
+/// Shows and edits every detail of a routine. Reached through a routine's
+/// detail pane, and also used to create a new one.
 struct RoutineEditorView: View {
     let target: RoutineEditorTarget
 
@@ -16,7 +16,9 @@ struct RoutineEditorView: View {
     @Environment(\.dismiss) private var dismiss
 
     @Query(sort: \Routine.sortIndex) private var routines: [Routine]
-    @Query(sort: \RoutineTag.name) private var tags: [RoutineTag]
+
+    @Query(sort: [SortDescriptor(\RoutineList.sortIndex), SortDescriptor(\RoutineList.createdAt)])
+    private var lists: [RoutineList]
 
     // Declared without an initial value because `init` assigns it; the `@State`
     // macro treats a declaration-site value as the one that wins.
@@ -24,14 +26,28 @@ struct RoutineEditorView: View {
 
     @State private var isShowingSymbolPicker = false
     @State private var photoSelection: PhotosPickerItem?
-    @State private var newTagName = ""
     @State private var isConfirmingDeletion = false
 
-    init(target: RoutineEditorTarget) {
+    /// Passing a selection binding is what lets the system offer its text
+    /// formatting controls for the rich-text description.
+    @State private var detailsSelection = AttributedTextSelection()
+
+    /// Called after the routine is deleted, so a detail view that presented the
+    /// editor can pop instead of being left pointing at a deleted object.
+    private let onDelete: (() -> Void)?
+
+    /// Pre-selects the list a new routine is being created from, so adding one
+    /// inside a list doesn't need the list picked again.
+    init(
+        target: RoutineEditorTarget,
+        defaultList: RoutineList? = nil,
+        onDelete: (() -> Void)? = nil
+    ) {
         self.target = target
+        self.onDelete = onDelete
         switch target {
         case .new:
-            draft = RoutineDraft()
+            draft = RoutineDraft(defaultList: defaultList)
         case .existing(let routine):
             draft = RoutineDraft(routine: routine)
         }
@@ -41,23 +57,28 @@ struct RoutineEditorView: View {
         if case .new = target { true } else { false }
     }
 
+    // The caller supplies the navigation — the editor is pushed inside the
+    // detail pane when editing, and wrapped in a stack when adding.
     var body: some View {
-        NavigationStack {
-            Form {
-                identitySection
-                appearanceSection
-                scheduleSection
-                tagsSection
+        Form {
+            identitySection
+            detailsSection
+            appearanceSection
+            scheduleSection
+            listSection
 
-                if case .existing = target {
-                    deleteSection
-                }
+            if case .existing(let routine) = target {
+                historySection(for: routine)
+                deleteSection
             }
-            .navigationTitle(navigationTitle)
-            #if !os(macOS)
-            .navigationBarTitleDisplayMode(.inline)
-            #endif
-            .toolbar {
+        }
+        .formStyle(.grouped)
+        .navigationTitle(navigationTitle)
+        #if !os(macOS)
+        .navigationBarTitleDisplayMode(.inline)
+        #endif
+        .toolbar {
+            if isNew {
                 ToolbarItem(placement: .cancellationAction) {
                     Button {
                         dismiss()
@@ -65,29 +86,27 @@ struct RoutineEditorView: View {
                         Text("Cancel", comment: "Dismisses the editor without saving")
                     }
                 }
-                ToolbarItem(placement: .confirmationAction) {
-                    Button {
-                        save()
-                    } label: {
-                        if isNew {
-                            Text("Add", comment: "Saves a new routine")
-                        } else {
-                            Text("Done", comment: "Saves changes to a routine")
-                        }
+            }
+
+            ToolbarItem(placement: .confirmationAction) {
+                Button {
+                    save()
+                } label: {
+                    if isNew {
+                        Text("Add", comment: "Saves a new routine")
+                    } else {
+                        Text("Done", comment: "Saves changes to a routine")
                     }
-                    .disabled(!draft.isSaveable)
                 }
-            }
-            .sheet(isPresented: $isShowingSymbolPicker) {
-                SymbolPickerView(symbolName: $draft.symbolName, tint: draft.color.color)
-            }
-            .onChange(of: photoSelection) { _, selection in
-                Task { await loadPhoto(from: selection) }
+                .disabled(!draft.isSaveable)
             }
         }
-        #if os(macOS)
-        .frame(minWidth: 420, minHeight: 540)
-        #endif
+        .sheet(isPresented: $isShowingSymbolPicker) {
+            SymbolPickerView(symbolName: $draft.symbolName, tint: draft.color.color)
+        }
+        .onChange(of: photoSelection) { _, selection in
+            Task { await loadPhoto(from: selection) }
+        }
     }
 
     private var navigationTitle: Text {
@@ -105,28 +124,64 @@ struct RoutineEditorView: View {
             HStack(spacing: 14) {
                 previewBadge
 
-                VStack(alignment: .leading, spacing: 4) {
-                    TextField(
-                        text: $draft.name,
-                        prompt: Text("Name", comment: "Placeholder for the routine name")
-                    ) {
-                        Text("Name", comment: "Label for the routine name field")
-                    }
-                    .font(.headline)
-                    #if !os(macOS)
-                    .textInputAutocapitalization(.sentences)
-                    #endif
+                TextField(
+                    text: $draft.name,
+                    prompt: Text("Name", comment: "Placeholder for the routine name")
+                ) {
+                    Text("Name", comment: "Label for the routine name field")
                 }
+                .font(.headline)
+                #if !os(macOS)
+                .textInputAutocapitalization(.sentences)
+                #endif
+            }
+        }
+    }
+
+    /// The photo and the description, in that order: the photo heads the
+    /// description rather than standing in for the symbol.
+    private var detailsSection: some View {
+        Section {
+            if let data = draft.imageData {
+                RoutinePhotoBanner(imageData: data)
+                    .listRowInsets(EdgeInsets())
             }
 
-            TextField(
-                text: $draft.details,
-                prompt: Text("Description", comment: "Placeholder for the routine description"),
-                axis: .vertical
-            ) {
-                Text("Description", comment: "Label for the routine description field")
+            TextEditor(text: $draft.details, selection: $detailsSelection)
+                // The full SwiftUI attribute scope, so the system's formatting
+                // controls offer bold, italic, underline and the rest.
+                .attributedTextFormattingDefinition(\.swiftUI)
+                .frame(minHeight: 120)
+
+            // After the text, so the description itself sits directly under the
+            // section header rather than behind a photo control.
+            photoControls
+        } header: {
+            Text("Description", comment: "Label for the routine description field")
+        } footer: {
+            Text(
+                "Select text to make it bold, italic, underlined or coloured.",
+                comment: "Explains how to format the description"
+            )
+        }
+    }
+
+    @ViewBuilder private var photoControls: some View {
+        PhotosPicker(selection: $photoSelection, matching: .images) {
+            if draft.imageData == nil {
+                Text("Add Photo", comment: "Row that opens the photo picker")
+            } else {
+                Text("Replace Photo", comment: "Row that replaces the chosen photo")
             }
-            .lineLimit(2...6)
+        }
+
+        if draft.imageData != nil {
+            Button(role: .destructive) {
+                draft.imageData = nil
+                photoSelection = nil
+            } label: {
+                Text("Remove Photo", comment: "Clears the routine's photo")
+            }
         }
     }
 
@@ -135,16 +190,11 @@ struct RoutineEditorView: View {
             isShowingSymbolPicker = true
         } label: {
             ZStack {
-                if let data = draft.imageData, let image = Image(data: data) {
-                    image
-                        .resizable()
-                        .scaledToFill()
-                } else {
-                    draft.color.color.opacity(0.18)
-                    Image(systemName: draft.symbolName)
-                        .font(.title2)
-                        .foregroundStyle(draft.color.color)
-                }
+                draft.color.color.opacity(0.18)
+
+                Image(systemName: draft.symbolName)
+                    .font(.title2)
+                    .foregroundStyle(draft.color.color)
             }
             .frame(width: 56, height: 56)
             .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
@@ -168,29 +218,12 @@ struct RoutineEditorView: View {
             .buttonStyle(.plain)
 
             colorRow
-
-            PhotosPicker(selection: $photoSelection, matching: .images) {
-                if draft.imageData == nil {
-                    Text("Add Photo", comment: "Row that opens the photo picker")
-                } else {
-                    Text("Replace Photo", comment: "Row that replaces the chosen photo")
-                }
-            }
-
-            if draft.imageData != nil {
-                Button(role: .destructive) {
-                    draft.imageData = nil
-                    photoSelection = nil
-                } label: {
-                    Text("Remove Photo", comment: "Clears the routine's photo")
-                }
-            }
         } header: {
             Text("Appearance", comment: "Section header for symbol, colour and photo")
         } footer: {
             Text(
-                "A photo replaces the symbol on the main screen.",
-                comment: "Explains that the photo takes precedence over the symbol"
+                "The symbol and colour identify the routine. A photo goes at the head of the description.",
+                comment: "Explains the roles of the symbol and the photo"
             )
         }
     }
@@ -199,27 +232,7 @@ struct RoutineEditorView: View {
         VStack(alignment: .leading, spacing: 10) {
             Text("Color", comment: "Label above the colour swatches")
 
-            LazyVGrid(columns: [GridItem(.adaptive(minimum: 40), spacing: 10)], spacing: 10) {
-                ForEach(RoutineColor.allCases) { option in
-                    Button {
-                        draft.color = option
-                    } label: {
-                        Circle()
-                            .fill(option.color)
-                            .frame(width: 28, height: 28)
-                            .overlay {
-                                if option == draft.color {
-                                    Image(systemName: "checkmark")
-                                        .font(.caption.weight(.bold))
-                                        .foregroundStyle(.white)
-                                }
-                            }
-                    }
-                    .buttonStyle(.plain)
-                    .accessibilityLabel(Text(option.displayName))
-                    .accessibilityAddTraits(option == draft.color ? [.isButton, .isSelected] : [.isButton])
-                }
-            }
+            ColorSwatchGrid(selection: $draft.color)
         }
         .padding(.vertical, 4)
     }
@@ -239,29 +252,7 @@ struct RoutineEditorView: View {
             }
 
             if draft.isTimed {
-                Stepper(value: $draft.durationMinutes, in: 0...240) {
-                    LabeledContent {
-                        Text(draft.durationMinutes, format: .number)
-                    } label: {
-                        Text("Minutes", comment: "Duration minutes stepper")
-                    }
-                }
-
-                Stepper(value: $draft.durationSeconds, in: 0...55, step: 5) {
-                    LabeledContent {
-                        Text(draft.durationSeconds, format: .number)
-                    } label: {
-                        Text("Seconds", comment: "Duration seconds stepper")
-                    }
-                }
-
-                LabeledContent {
-                    Text(draft.durationDescription)
-                        .monospacedDigit()
-                        .foregroundStyle(.secondary)
-                } label: {
-                    Text("Duration", comment: "Resulting total duration")
-                }
+                DurationPicker(totalSeconds: $draft.durationSeconds)
             }
         } header: {
             Text("Schedule", comment: "Section header for repetitions and duration")
@@ -280,54 +271,47 @@ struct RoutineEditorView: View {
         }
     }
 
-    private var tagsSection: some View {
+    /// A routine belongs to exactly one list, so this is a single choice rather
+    /// than the multi-select the old tags needed.
+    private var listSection: some View {
         Section {
-            ForEach(tags) { tag in
-                Button {
-                    toggle(tag)
-                } label: {
-                    LabeledContent {
-                        if draft.tagIDs.contains(tag.persistentModelID) {
-                            Image(systemName: "checkmark")
-                                .foregroundStyle(.tint)
-                        }
-                    } label: {
-                        Label {
-                            Text(tag.name)
-                        } icon: {
-                            Image(systemName: "tag.fill")
-                                .foregroundStyle(tag.color)
-                        }
+            Picker(selection: $draft.listID) {
+                Text("None", comment: "The option for a routine that belongs to no list")
+                    .tag(PersistentIdentifier?.none)
+
+                ForEach(lists) { list in
+                    Label {
+                        Text(list.name)
+                    } icon: {
+                        Image(systemName: list.symbolName)
+                            .foregroundStyle(list.color)
                     }
+                    .tag(PersistentIdentifier?.some(list.persistentModelID))
                 }
-                .buttonStyle(.plain)
-                .accessibilityAddTraits(
-                    draft.tagIDs.contains(tag.persistentModelID) ? [.isButton, .isSelected] : [.isButton]
-                )
-            }
-
-            HStack {
-                TextField(
-                    text: $newTagName,
-                    prompt: Text("New Tag", comment: "Placeholder for creating a tag")
-                ) {
-                    Text("New Tag", comment: "Label for the new tag field")
-                }
-                .onSubmit(addTag)
-
-                Button(action: addTag) {
-                    Image(systemName: "plus.circle.fill")
-                }
-                .buttonStyle(.borderless)
-                .disabled(newTagName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
-                .accessibilityLabel(Text("Add Tag", comment: "VoiceOver label for the add tag button"))
+            } label: {
+                Text("List", comment: "Row that chooses the routine's list")
             }
         } header: {
-            Text("Tags", comment: "Section header for tags")
+            Text("List", comment: "Row that chooses the routine's list")
         } footer: {
             Text(
-                "Workouts are started from a tag, and cover every routine that carries it.",
-                comment: "Explains the relationship between tags and workouts"
+                "Workouts are started from a list, and cover every routine in it.",
+                comment: "Explains the relationship between lists and workouts"
+            )
+        }
+    }
+
+    /// A month of recorded history, editable here so a day missed at the time
+    /// can still be filled in.
+    private func historySection(for routine: Routine) -> some View {
+        Section {
+            RoutineHistoryCalendar(routine: routine, isEditable: true)
+        } header: {
+            Text("History", comment: "Section header for the history calendar")
+        } footer: {
+            Text(
+                "Tap a past day to record it now. Step back to see earlier months.",
+                comment: "Explains the editable history calendar"
             )
         }
     }
@@ -358,34 +342,6 @@ struct RoutineEditorView: View {
 
     // MARK: - Actions
 
-    private func toggle(_ tag: RoutineTag) {
-        let id = tag.persistentModelID
-        if draft.tagIDs.contains(id) {
-            draft.tagIDs.remove(id)
-        } else {
-            draft.tagIDs.insert(id)
-        }
-    }
-
-    /// Creates the tag straight away and selects it.
-    ///
-    /// Tags are shared between routines, so a new one is worth keeping even if
-    /// this edit is then cancelled.
-    private func addTag() {
-        let name = newTagName.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !name.isEmpty else { return }
-
-        if let existing = tags.first(where: { $0.name.localizedCaseInsensitiveCompare(name) == .orderedSame }) {
-            draft.tagIDs.insert(existing.persistentModelID)
-        } else {
-            let tag = RoutineTag(name: name, colorIdentifier: draft.color.rawValue)
-            context.insert(tag)
-            draft.tagIDs.insert(tag.persistentModelID)
-        }
-
-        newTagName = ""
-    }
-
     private func loadPhoto(from selection: PhotosPickerItem?) async {
         guard let selection else { return }
         guard let data = try? await selection.loadTransferable(type: Data.self) else { return }
@@ -399,9 +355,9 @@ struct RoutineEditorView: View {
         case .new:
             let routine = Routine(sortIndex: RoutineStore.nextSortIndex(after: routines))
             context.insert(routine)
-            draft.apply(to: routine, availableTags: tags)
+            draft.apply(to: routine, availableLists: lists)
         case .existing(let routine):
-            draft.apply(to: routine, availableTags: tags)
+            draft.apply(to: routine, availableLists: lists)
         }
         dismiss()
     }
@@ -411,5 +367,24 @@ struct RoutineEditorView: View {
             RoutineStore.delete(routine, in: context)
         }
         dismiss()
+        onDelete?()
     }
 }
+
+#if DEBUG
+// The editor takes its navigation from whatever presents it, so the previews
+// supply a stack the way the detail pane and the add sheet do.
+#Preview("Edit") {
+    NavigationStack {
+        RoutineEditorView(target: .existing(PreviewData.sampleRoutine))
+    }
+    .modelContainer(PreviewData.container)
+}
+
+#Preview("New") {
+    NavigationStack {
+        RoutineEditorView(target: .new)
+    }
+    .modelContainer(PreviewData.container)
+}
+#endif

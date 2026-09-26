@@ -36,6 +36,18 @@
           }
         }
       }
+    },
+    "NSCalendarsWriteOnlyAccessUsageDescription" : {
+      "comment" : "Privacy - Calendars Write Only Usage Description",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Routines adds a calendar event when a workout ends, so it appears at the time you started it."
+          }
+        }
+      }
     }
   },
   "version" : "1.0"

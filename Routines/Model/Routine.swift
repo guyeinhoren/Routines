@@ -16,11 +16,18 @@ import SwiftUI
 final class Routine {
     var name: String = ""
 
-    /// Free-form notes. Named `details` rather than `description` to avoid
-    /// colliding with `CustomStringConvertible`.
+    /// The plain-text rendering of the description. Named `details` rather than
+    /// `description` to avoid colliding with `CustomStringConvertible`.
+    ///
+    /// Kept alongside `detailsRichData` so emptiness checks, VoiceOver and any
+    /// future search never have to decode the archive.
     var details: String = ""
 
-    var symbolName: String = "checkmark.circle.fill"
+    /// The description as archived rich text, or `nil` when it has no formatting
+    /// or predates rich text support.
+    var detailsRichData: Data?
+
+    var symbolName: String = "repeat"
     var colorIdentifier: String = RoutineColor.fallback.rawValue
 
     /// Length of a single repetition in seconds. Zero means the routine is
@@ -39,7 +46,9 @@ final class Routine {
     /// Stored outside the database row so large photos don't bloat the store.
     @Attribute(.externalStorage) var imageData: Data?
 
-    var tags: [RoutineTag]?
+    /// The list this routine belongs to, or `nil` for a routine that isn't in
+    /// any list yet. Unassigned routines still appear under All.
+    var list: RoutineList?
 
     @Relationship(deleteRule: .cascade, inverse: \RoutineCompletion.routine)
     var completions: [RoutineCompletion]?
@@ -47,13 +56,13 @@ final class Routine {
     init(
         name: String = "",
         details: String = "",
-        symbolName: String = "checkmark.circle.fill",
+        symbolName: String = "repeat",
         colorIdentifier: String = RoutineColor.fallback.rawValue,
         durationSeconds: Int = 0,
         repetitionsPerDay: Int = 1,
         sortIndex: Int = 0,
         imageData: Data? = nil,
-        tags: [RoutineTag] = []
+        list: RoutineList? = nil
     ) {
         self.name = name
         self.details = details
@@ -64,12 +73,30 @@ final class Routine {
         self.sortIndex = sortIndex
         self.createdAt = Date()
         self.imageData = imageData
-        self.tags = tags
+        self.list = list
         self.completions = []
     }
 }
 
 extension Routine {
+    /// The description as rich text.
+    ///
+    /// Routines saved before rich text existed fall back to their plain string,
+    /// so nothing has to be migrated.
+    var richDetails: AttributedString {
+        RichText.decode(detailsRichData) ?? AttributedString(details)
+    }
+
+    var hasDetails: Bool {
+        !details.isEmpty
+    }
+
+    /// Stores the description in both forms at once, keeping them in step.
+    func setDetails(_ text: AttributedString) {
+        detailsRichData = RichText.encode(text)
+        details = String(text.characters)
+    }
+
     var routineColor: RoutineColor {
         RoutineColor(identifier: colorIdentifier)
     }
@@ -87,10 +114,6 @@ extension Routine {
     /// divide by zero when computing progress.
     var dailyTarget: Int {
         max(1, repetitionsPerDay)
-    }
-
-    var sortedTags: [RoutineTag] {
-        (tags ?? []).sorted { $0.name.localizedStandardCompare($1.name) == .orderedAscending }
     }
 
     func completion(on day: DayKey) -> RoutineCompletion? {
@@ -111,7 +134,7 @@ extension Routine {
         completedCount(on: day) >= dailyTarget
     }
 
-    func hasTag(_ tag: RoutineTag) -> Bool {
-        (tags ?? []).contains { $0.persistentModelID == tag.persistentModelID }
+    func belongs(to list: RoutineList) -> Bool {
+        self.list?.persistentModelID == list.persistentModelID
     }
 }

@@ -20,6 +20,12 @@ struct DurationPicker: View {
     /// only ever deals with one number.
     @Binding var totalSeconds: Int
 
+    /// The surrounding direction, read here before `body` forces its children
+    /// left-to-right. The order of the three wheels is fixed, but within each
+    /// wheel the unit follows the language: after the number in English
+    /// ("5 min"), before it in Hebrew, where the label reads first.
+    @Environment(\.layoutDirection) private var surroundingDirection
+
     private var hours: Int { totalSeconds / 3600 }
     private var minutes: Int { (totalSeconds % 3600) / 60 }
     private var seconds: Int { totalSeconds % 60 }
@@ -75,7 +81,16 @@ struct DurationPicker: View {
     /// One wheel and its unit. The label sits outside the picker so it stays
     /// put while the numbers scroll past it, as it does in the Clock app.
     private func wheel(_ value: Binding<Int>, range: ClosedRange<Int>, unit: Text) -> some View {
-        HStack(spacing: 2) {
+        let unitLabel = unit
+            .font(.footnote)
+            .foregroundStyle(.secondary)
+            .fixedSize()
+
+        return HStack(spacing: 2) {
+            if surroundingDirection == .rightToLeft {
+                unitLabel
+            }
+
             Picker(selection: value) {
                 ForEach(range, id: \.self) { number in
                     Text(number, format: .number).tag(number)
@@ -88,10 +103,9 @@ struct DurationPicker: View {
             .frame(width: 58)
             .clipped()
 
-            unit
-                .font(.footnote)
-                .foregroundStyle(.secondary)
-                .fixedSize()
+            if surroundingDirection == .leftToRight {
+                unitLabel
+            }
         }
     }
     #endif
