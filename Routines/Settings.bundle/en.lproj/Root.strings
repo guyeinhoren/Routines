@@ -1,0 +1,9 @@
+/* Settings.bundle — English */
+
+"WORKOUTS_GROUP" = "Workouts";
+"WORKOUTS_FOOTER" = "When a workout ends, an event with the list's name is added to your calendar at the time the workout started.";
+"CALENDAR_SYNC_TITLE" = "Add to Calendar";
+
+"TIMER_GROUP" = "Timer";
+"TIMER_FOOTER" = "Running a routine's timer to the end records one repetition for today.";
+"TIMER_COMPLETION_TITLE" = "Finished Timer Counts as Done";

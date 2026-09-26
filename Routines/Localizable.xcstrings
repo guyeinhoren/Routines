@@ -1,0 +1,1039 @@
+{
+  "sourceLanguage" : "en",
+  "strings" : {
+    "%lld of %lld days complete this week" : {
+      "comment" : "Accessibility value summarising the week",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "הושלמו %1$lld מתוך %2$lld ימים השבוע"
+          }
+        }
+      }
+    },
+    "%lld of %lld done today" : {
+      "comment" : "Accessibility value for today's progress",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "בוצעו %1$lld מתוך %2$lld היום"
+          }
+        }
+      }
+    },
+    "%lld of %lld done today, %lld of %lld days complete this week" : {
+      "comment" : "Accessibility value for a routine with several repetitions a day",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "בוצעו %1$lld מתוך %2$lld היום, הושלמו %3$lld מתוך %4$lld ימים השבוע"
+          }
+        }
+      }
+    },
+    "%lld of %lld recorded" : {
+      "comment" : "Accessibility value for a day in the activity heatmap",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "נרשמו %1$lld מתוך %2$lld"
+          }
+        }
+      }
+    },
+    "A timed routine gets a play button on the main screen." : {
+      "comment" : "Explains what the Timed switch enables",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "רוטינה עם משך זמן מקבלת לחצן הפעלה במסך הראשי."
+          }
+        }
+      }
+    },
+    "Activity" : {
+      "comment" : "Header above the activity heatmap",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "פעילות"
+          }
+        }
+      }
+    },
+    "Add" : {
+      "comment" : "Saves a new routine",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "הוספה"
+          }
+        }
+      }
+    },
+    "Add a routine to start tracking it day by day." : {
+      "comment" : "Empty state description",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "הוסף רוטינה כדי להתחיל לעקוב אחריה יום אחר יום."
+          }
+        }
+      }
+    },
+    "Add Photo" : {
+      "comment" : "Row that opens the photo picker",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "הוספת תמונה"
+          }
+        }
+      }
+    },
+    "Add Routine" : {
+      "comment" : "Toolbar button that creates a routine",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "הוספת רוטינה"
+          }
+        }
+      }
+    },
+    "Add Workouts to Calendar" : {
+      "comment" : "Preference that writes workouts to the calendar",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "הוספת אימונים ללוח השנה"
+          }
+        }
+      }
+    },
+    "All" : {
+      "comment" : "The entry covering every routine",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "הכול"
+          }
+        }
+      }
+    },
+    "Appearance" : {
+      "comment" : "Section header for symbol, colour and photo",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "מראה"
+          }
+        }
+      }
+    },
+    "Blue" : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "כחול"
+          }
+        }
+      }
+    },
+    "Brown" : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "חום"
+          }
+        }
+      }
+    },
+    "Cancel" : {
+      "comment" : "Dismisses the editor without saving",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ביטול"
+          }
+        }
+      }
+    },
+    "Choose Symbol" : {
+      "comment" : "VoiceOver label for the symbol preview button",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "בחירת סמל"
+          }
+        }
+      }
+    },
+    "Close" : {
+      "comment" : "VoiceOver label for the timer's close button",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "סגירה"
+          }
+        }
+      }
+    },
+    "Color" : {
+      "comment" : "Label above the colour swatches",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "צבע"
+          }
+        }
+      }
+    },
+    "Complete" : {
+      "comment" : "Accessibility value for a fully completed day, and shown in the timer when the countdown ends",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "הושלם"
+          }
+        }
+      }
+    },
+    "Cyan" : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "תכלת"
+          }
+        }
+      }
+    },
+    "Delete" : {
+      "comment" : "Swipe action and delete confirmation",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "מחיקה"
+          }
+        }
+      }
+    },
+    "Delete “%@”" : {
+      "comment" : "Confirm deleting a named routine or list",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "מחיקת „%@”"
+          }
+        }
+      }
+    },
+    "Delete List?" : {
+      "comment" : "Title of the list delete confirmation",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "למחוק את הרשימה?"
+          }
+        }
+      }
+    },
+    "Delete Routine" : {
+      "comment" : "Deletes the routine being edited",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "מחיקת הרוטינה"
+          }
+        }
+      }
+    },
+    "Delete Routine?" : {
+      "comment" : "Title of the delete confirmation",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "למחוק את הרוטינה?"
+          }
+        }
+      }
+    },
+    "Description" : {
+      "comment" : "Label for the routine description field",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "תיאור"
+          }
+        }
+      }
+    },
+    "Done" : {
+      "comment" : "Saves changes and dismisses a sheet",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "סיום"
+          }
+        }
+      }
+    },
+    "Done today" : {
+      "comment" : "Accessibility value when today is complete",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "בוצע היום"
+          }
+        }
+      }
+    },
+    "Duration" : {
+      "comment" : "Resulting total duration, and VoiceOver label for the duration picker",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "משך"
+          }
+        }
+      }
+    },
+    "Edit" : {
+      "comment" : "Opens the editor from the detail view",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "עריכה"
+          }
+        }
+      }
+    },
+    "Elapsed time" : {
+      "comment" : "VoiceOver label for the workout timer",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "זמן שחלף"
+          }
+        }
+      }
+    },
+    "End" : {
+      "comment" : "Short button that finishes the current workout",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "סיים"
+          }
+        }
+      }
+    },
+    "End Workout" : {
+      "comment" : "Toolbar button that finishes the workout",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "סיום אימון"
+          }
+        }
+      }
+    },
+    "Finished Timer Counts as Done" : {
+      "comment" : "Preference that records a repetition when a timer ends",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "סיום טיימר נחשב כביצוע"
+          }
+        }
+      }
+    },
+    "Green" : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ירוק"
+          }
+        }
+      }
+    },
+    "History" : {
+      "comment" : "Section header for the history calendar",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "היסטוריה"
+          }
+        }
+      }
+    },
+    "hr" : {
+      "comment" : "Short unit label beside the hours wheel of the duration picker",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "שעות"
+          }
+        }
+      }
+    },
+    "Indigo" : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "אינדיגו"
+          }
+        }
+      }
+    },
+    "Its recorded history will be deleted as well. This cannot be undone." : {
+      "comment" : "Explanation in the delete confirmation",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "גם ההיסטוריה שנרשמה תימחק. לא ניתן לבטל פעולה זו."
+          }
+        }
+      }
+    },
+    "Its routines are kept and stay available under All." : {
+      "comment" : "Reassures that deleting a list doesn't delete routines",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "הרוטינות שבה נשמרות וימשיכו להיות זמינות תחת ״הכול״."
+          }
+        }
+      }
+    },
+    "Less" : {
+      "comment" : "Lower end of the activity heatmap's scale",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "פחות"
+          }
+        }
+      }
+    },
+    "List" : {
+      "comment" : "The routine's list, and the list editor's title when editing",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "רשימה"
+          }
+        }
+      }
+    },
+    "List Name" : {
+      "comment" : "Label and placeholder for a list's name",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "שם הרשימה"
+          }
+        }
+      }
+    },
+    "Make a list for each kind of routine — strength, stretching, whatever you keep up." : {
+      "comment" : "Empty state description for lists",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "צור רשימה לכל סוג של רוטינה — כוח, מתיחות, וכל דבר אחר שאתה שומר עליו."
+          }
+        }
+      }
+    },
+    "min" : {
+      "comment" : "Short unit label beside the minutes wheel of the duration picker",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "דק׳"
+          }
+        }
+      }
+    },
+    "Mint" : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "מנטה"
+          }
+        }
+      }
+    },
+    "More" : {
+      "comment" : "Upper end of the activity heatmap's scale",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "יותר"
+          }
+        }
+      }
+    },
+    "My Lists" : {
+      "comment" : "Header above the person's routine lists",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "הרשימות שלי"
+          }
+        }
+      }
+    },
+    "Name" : {
+      "comment" : "Label and placeholder for a name field",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "שם"
+          }
+        }
+      }
+    },
+    "New List" : {
+      "comment" : "List editor title when creating",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "רשימה חדשה"
+          }
+        }
+      }
+    },
+    "New Routine" : {
+      "comment" : "Editor title when creating",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "רוטינה חדשה"
+          }
+        }
+      }
+    },
+    "Next month" : {
+      "comment" : "VoiceOver label for the calendar's forward button",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "החודש הבא"
+          }
+        }
+      }
+    },
+    "No Lists" : {
+      "comment" : "Empty state title for lists",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "אין רשימות"
+          }
+        }
+      }
+    },
+    "No Routines" : {
+      "comment" : "Empty state title",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "אין רוטינות"
+          }
+        }
+      }
+    },
+    "None" : {
+      "comment" : "The option for a routine that belongs to no list",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ללא"
+          }
+        }
+      }
+    },
+    "Not done today" : {
+      "comment" : "Accessibility value when today is incomplete",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "לא בוצע היום"
+          }
+        }
+      }
+    },
+    "Nothing recorded" : {
+      "comment" : "Accessibility value for a day with no progress",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "לא נרשם דבר"
+          }
+        }
+      }
+    },
+    "Orange" : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "כתום"
+          }
+        }
+      }
+    },
+    "Partly complete" : {
+      "comment" : "Accessibility value for a partly completed day",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "הושלם חלקית"
+          }
+        }
+      }
+    },
+    "Pause" : {
+      "comment" : "VoiceOver label for the pause button",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "השהיה"
+          }
+        }
+      }
+    },
+    "Pink" : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ורוד"
+          }
+        }
+      }
+    },
+    "Previous month" : {
+      "comment" : "VoiceOver label for the calendar's back button",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "החודש הקודם"
+          }
+        }
+      }
+    },
+    "Purple" : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "סגול"
+          }
+        }
+      }
+    },
+    "Records a repetition for this day." : {
+      "comment" : "VoiceOver hint for an editable history day",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "רושם חזרה עבור היום הזה."
+          }
+        }
+      }
+    },
+    "Records one repetition for today. Tap again once the daily target is met to clear today." : {
+      "comment" : "VoiceOver hint for the routine row",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "רושם חזרה אחת עבור היום. לחיצה נוספת לאחר השלמת היעד היומי מנקה את היום."
+          }
+        }
+      }
+    },
+    "Red" : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "אדום"
+          }
+        }
+      }
+    },
+    "Remove Photo" : {
+      "comment" : "Clears the routine's photo",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "הסרת התמונה"
+          }
+        }
+      }
+    },
+    "Repetitions per Day" : {
+      "comment" : "How many times a day the routine is performed",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "חזרות ביום"
+          }
+        }
+      }
+    },
+    "Replace Photo" : {
+      "comment" : "Row that replaces the chosen photo",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "החלפת התמונה"
+          }
+        }
+      }
+    },
+    "Resume" : {
+      "comment" : "VoiceOver label for the resume button",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "המשך"
+          }
+        }
+      }
+    },
+    "Routine" : {
+      "comment" : "Editor title when editing",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "רוטינה"
+          }
+        }
+      }
+    },
+    "Routine photo" : {
+      "comment" : "VoiceOver label for the routine's photo",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "תמונת הרוטינה"
+          }
+        }
+      }
+    },
+    "Routines" : {
+      "comment" : "Main screen title",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "רוטינות"
+          }
+        }
+      }
+    },
+    "Running a routine's timer to the end records one repetition for today." : {
+      "comment" : "Explains the timer completion preference",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "הרצת הטיימר של רוטינה עד הסוף נרשמת כחזרה אחת עבור היום."
+          }
+        }
+      }
+    },
+    "Schedule" : {
+      "comment" : "Section header for repetitions and duration",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "תדירות"
+          }
+        }
+      }
+    },
+    "sec" : {
+      "comment" : "Short unit label beside the seconds wheel of the duration picker",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "שנ׳"
+          }
+        }
+      }
+    },
+    "Select text to make it bold, italic, underlined or coloured." : {
+      "comment" : "Explains how to format the description",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "בחר טקסט כדי להדגיש אותו, להטות, להוסיף קו תחתון או לצבוע."
+          }
+        }
+      }
+    },
+    "Shows the routine's details." : {
+      "comment" : "VoiceOver hint for the routine name",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "מציג את פרטי הרוטינה."
+          }
+        }
+      }
+    },
+    "Some routines aren't in a list yet. Open All to give them one." : {
+      "comment" : "Footer pointing out routines with no list",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "יש רוטינות שעדיין אינן ברשימה. פתח את ״הכול״ כדי לשבץ אותן."
+          }
+        }
+      }
+    },
+    "Start Timer" : {
+      "comment" : "Starts the routine's timer from the detail view",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "הפעלת טיימר"
+          }
+        }
+      }
+    },
+    "Start timer for %@" : {
+      "comment" : "VoiceOver label for the play button",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "הפעלת טיימר עבור %@"
+          }
+        }
+      }
+    },
+    "Start Workout" : {
+      "comment" : "Toolbar button that starts a workout",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "התחלת אימון"
+          }
+        }
+      }
+    },
+    "Symbol" : {
+      "comment" : "Title of the symbol picker and the row that opens it",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "סמל"
+          }
+        }
+      }
+    },
+    "Tap a past day to record it now. Step back to see earlier months." : {
+      "comment" : "Explains the editable history calendar",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "הקש על יום שעבר כדי לרשום אותו כעת. חזור אחורה כדי לראות חודשים קודמים."
+          }
+        }
+      }
+    },
+    "Teal" : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "טורקיז"
+          }
+        }
+      }
+    },
+    "The day square fills gradually as you record each repetition." : {
+      "comment" : "Explains partial filling of a day square",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ריבוע היום מתמלא בהדרגה עם כל חזרה שנרשמת."
+          }
+        }
+      }
+    },
+    "The symbol and colour identify the routine. A photo goes at the head of the description." : {
+      "comment" : "Explains the roles of the symbol and the photo",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "הסמל והצבע מזהים את הרוטינה. תמונה מופיעה בראש התיאור."
+          }
+        }
+      }
+    },
+    "This week" : {
+      "comment" : "VoiceOver label for the week of day squares",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "השבוע"
+          }
+        }
+      }
+    },
+    "Time remaining" : {
+      "comment" : "VoiceOver label for the countdown",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "הזמן שנותר"
+          }
+        }
+      }
+    },
+    "Timed" : {
+      "comment" : "Switch that gives the routine a duration",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "עם משך זמן"
+          }
+        }
+      }
+    },
+    "Upcoming" : {
+      "comment" : "Accessibility value for a future day in the history calendar",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "עתידי"
+          }
+        }
+      }
+    },
+    "When a workout ends, an event with the list's name is added at the time the workout started." : {
+      "comment" : "Explains the calendar preference",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "בסיום אימון נוסף אירוע בשם הרשימה, בשעה שבה האימון התחיל."
+          }
+        }
+      }
+    },
+    "Workouts are started from a list, and cover every routine in it." : {
+      "comment" : "Explains the relationship between lists and workouts",
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "אימון מתחיל מרשימה, וכולל כל רוטינה שבה."
+          }
+        }
+      }
+    },
+    "Yellow" : {
+      "localizations" : {
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "צהוב"
+          }
+        }
+      }
+    }
+  },
+  "version" : "1.0"
+}

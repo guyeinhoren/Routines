@@ -1,0 +1,9 @@
+/* Settings.bundle — Hebrew */
+
+"WORKOUTS_GROUP" = "אימונים";
+"WORKOUTS_FOOTER" = "בסיום אימון נוסף ללוח השנה אירוע בשם הרשימה, בשעה שבה האימון התחיל.";
+"CALENDAR_SYNC_TITLE" = "הוספה ללוח השנה";
+
+"TIMER_GROUP" = "טיימר";
+"TIMER_FOOTER" = "הרצת הטיימר של רוטינה עד הסוף נרשמת כחזרה אחת עבור היום.";
+"TIMER_COMPLETION_TITLE" = "סיום טיימר נחשב כביצוע";
