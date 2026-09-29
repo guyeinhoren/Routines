@@ -2,6 +2,8 @@
 Routines helps you build and stick to the habits that matter to you, from morning exercise to reading before bed, while tracking your progress visually.
 Each routine gets a square for every day of the week that fills in gradually as you go, so you can see your whole week at a glance and know exactly where you stand.
 
+> Coming soon to the app store...
+
 ## FEATURES
 
 A weekly log you can see and feel Every routine has seven squares, one for each day, that fill in with every repetition you log. Set how many times a day you want to do each routine, and add a full-screen timer for routines that need set time, like meditation or stretching.
