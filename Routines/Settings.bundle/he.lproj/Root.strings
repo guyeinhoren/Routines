@@ -5,5 +5,14 @@
 "CALENDAR_SYNC_TITLE" = "הוספה ללוח השנה";
 
 "TIMER_GROUP" = "טיימר";
-"TIMER_FOOTER" = "הרצת הטיימר של רוטינה עד הסוף נרשמת כחזרה אחת עבור היום.";
+"TIMER_FOOTER" = "הרצת הטיימר של רוטינה עד הסוף נרשמת כחזרה אחת עבור היום. השארת המסך דולק צורכת יותר סוללה.";
 "TIMER_COMPLETION_TITLE" = "סיום טיימר נחשב כביצוע";
+"TIMER_SOUND_TITLE" = "צליל בסיום";
+"TIMER_SOUND_GENTLE" = "צלצול עדין";
+"TIMER_SOUND_LOUD" = "צלצול רועש";
+"TIMER_SOUND_OFF" = "ללא";
+"KEEP_SCREEN_ON_TITLE" = "השארת המסך דולק";
+
+"WELCOME_GROUP" = "ברוכים הבאים";
+"WELCOME_FOOTER" = "מסך הפתיחה יוצג בפעם הבאה שתפתחו את ״רוטינות״.";
+"WELCOME_AGAIN_TITLE" = "הצגת מסך הפתיחה";

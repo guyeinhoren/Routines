@@ -7,13 +7,18 @@ import PhotosUI
 import SwiftData
 import SwiftUI
 
-/// Shows and edits every detail of a routine. Reached through a routine's
-/// detail pane, and also used to create a new one.
+/// Shows and edits every detail of a routine. Opened straight from a routine's
+/// name on the main screen, and also used to create a new one.
+///
+/// There's no separate read-only view in front of it: everything it would show
+/// is here, along with the one action it offered that isn't an edit — starting
+/// the timer.
 struct RoutineEditorView: View {
     let target: RoutineEditorTarget
 
     @Environment(\.modelContext) private var context
     @Environment(\.dismiss) private var dismiss
+    @Environment(DayTracker.self) private var dayTracker
 
     @Query(sort: \Routine.sortIndex) private var routines: [Routine]
 
@@ -27,24 +32,26 @@ struct RoutineEditorView: View {
     @State private var isShowingSymbolPicker = false
     @State private var photoSelection: PhotosPickerItem?
     @State private var isConfirmingDeletion = false
+    @State private var timerRoutine: Routine?
 
     /// Passing a selection binding is what lets the system offer its text
     /// formatting controls for the rich-text description.
     @State private var detailsSelection = AttributedTextSelection()
 
-    /// Called after the routine is deleted, so a detail view that presented the
-    /// editor can pop instead of being left pointing at a deleted object.
-    private let onDelete: (() -> Void)?
+    /// Called instead of `dismiss` when the editor closes — after saving,
+    /// cancelling or deleting. The Mac shows the editor in a panel beside the
+    /// list rather than presenting it, and a panel can't be dismissed.
+    private let onFinish: (() -> Void)?
 
     /// Pre-selects the list a new routine is being created from, so adding one
     /// inside a list doesn't need the list picked again.
     init(
         target: RoutineEditorTarget,
         defaultList: RoutineList? = nil,
-        onDelete: (() -> Void)? = nil
+        onFinish: (() -> Void)? = nil
     ) {
         self.target = target
-        self.onDelete = onDelete
+        self.onFinish = onFinish
         switch target {
         case .new:
             draft = RoutineDraft(defaultList: defaultList)
@@ -57,17 +64,36 @@ struct RoutineEditorView: View {
         if case .new = target { true } else { false }
     }
 
-    // The caller supplies the navigation — the editor is pushed inside the
-    // detail pane when editing, and wrapped in a stack when adding.
+    private var existingRoutine: Routine? {
+        if case .existing(let routine) = target { routine } else { nil }
+    }
+
+    /// Lists a routine can be a member of. Smart lists gather by tag, so they
+    /// aren't something to pick here.
+    private var assignableLists: [RoutineList] {
+        lists.filter { !$0.isSmart }
+    }
+
+    /// In the Mac's side panel the window toolbar belongs to the list, so the
+    /// editor's own buttons go at the foot of the panel instead.
+    private var usesInlineActions: Bool {
+        #if os(macOS)
+        onFinish != nil
+        #else
+        false
+        #endif
+    }
+
+    // The caller supplies the navigation — a stack inside the sheet on iPhone,
+    // or inside the side panel on the Mac.
     var body: some View {
         Form {
             identitySection
             detailsSection
-            appearanceSection
             scheduleSection
-            listSection
+            organizationSection
 
-            if case .existing(let routine) = target {
+            if let routine = existingRoutine {
                 historySection(for: routine)
                 deleteSection
             }
@@ -78,31 +104,25 @@ struct RoutineEditorView: View {
         .navigationBarTitleDisplayMode(.inline)
         #endif
         .toolbar {
-            if isNew {
+            if !usesInlineActions {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button {
-                        dismiss()
-                    } label: {
-                        Text("Cancel", comment: "Dismisses the editor without saving")
-                    }
+                    cancelButton
+                }
+                ToolbarItem(placement: .confirmationAction) {
+                    saveButton
                 }
             }
-
-            ToolbarItem(placement: .confirmationAction) {
-                Button {
-                    save()
-                } label: {
-                    if isNew {
-                        Text("Add", comment: "Saves a new routine")
-                    } else {
-                        Text("Done", comment: "Saves changes to a routine")
-                    }
-                }
-                .disabled(!draft.isSaveable)
+        }
+        .safeAreaInset(edge: .bottom, spacing: 0) {
+            if usesInlineActions {
+                inlineActions
             }
         }
         .sheet(isPresented: $isShowingSymbolPicker) {
             SymbolPickerView(symbolName: $draft.symbolName, tint: draft.color.color)
+        }
+        .fullScreenPresentation(item: $timerRoutine) { routine in
+            RoutineTimerScreen(routine: routine)
         }
         .onChange(of: photoSelection) { _, selection in
             Task { await loadPhoto(from: selection) }
@@ -117,8 +137,44 @@ struct RoutineEditorView: View {
         }
     }
 
+    // MARK: - Actions bar
+
+    private var cancelButton: some View {
+        Button(action: finish) {
+            Text("Cancel", comment: "Dismisses the editor without saving")
+        }
+    }
+
+    private var saveButton: some View {
+        Button(action: save) {
+            if isNew {
+                Text("Add", comment: "Saves a new routine")
+            } else {
+                Text("Done", comment: "Saves changes to a routine")
+            }
+        }
+        .disabled(!draft.isSaveable)
+    }
+
+    private var inlineActions: some View {
+        HStack {
+            cancelButton
+                .keyboardShortcut(.cancelAction)
+            Spacer()
+            saveButton
+                .keyboardShortcut(.defaultAction)
+                .buttonStyle(.borderedProminent)
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 10)
+        .background(.bar)
+    }
+
     // MARK: - Sections
 
+    /// The symbol, the name and the colour together, since between them they
+    /// are what identifies the routine on every screen. Tapping the symbol
+    /// changes it, so there's no separate row for that.
     private var identitySection: some View {
         Section {
             HStack(spacing: 14) {
@@ -134,6 +190,24 @@ struct RoutineEditorView: View {
                 #if !os(macOS)
                 .textInputAutocapitalization(.sentences)
                 #endif
+            }
+
+            ColorSwatchGrid(selection: $draft.color)
+
+            if let routine = existingRoutine, routine.isTimed {
+                Button {
+                    timerRoutine = routine
+                } label: {
+                    Label {
+                        Text("Start Timer", comment: "Starts the routine's timer from the detail view")
+                    } icon: {
+                        Image(systemName: "play.fill")
+                    }
+                }
+            }
+        } footer: {
+            if let routine = existingRoutine {
+                todayDescription(for: routine)
             }
         }
     }
@@ -203,40 +277,6 @@ struct RoutineEditorView: View {
         .accessibilityLabel(Text("Choose Symbol", comment: "VoiceOver label for the symbol preview button"))
     }
 
-    private var appearanceSection: some View {
-        Section {
-            Button {
-                isShowingSymbolPicker = true
-            } label: {
-                LabeledContent {
-                    Image(systemName: draft.symbolName)
-                        .foregroundStyle(draft.color.color)
-                } label: {
-                    Text("Symbol", comment: "Row that opens the symbol picker")
-                }
-            }
-            .buttonStyle(.plain)
-
-            colorRow
-        } header: {
-            Text("Appearance", comment: "Section header for symbol, colour and photo")
-        } footer: {
-            Text(
-                "The symbol and colour identify the routine. A photo goes at the head of the description.",
-                comment: "Explains the roles of the symbol and the photo"
-            )
-        }
-    }
-
-    private var colorRow: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            Text("Color", comment: "Label above the colour swatches")
-
-            ColorSwatchGrid(selection: $draft.color)
-        }
-        .padding(.vertical, 4)
-    }
-
     private var scheduleSection: some View {
         Section {
             Stepper(value: $draft.repetitionsPerDay, in: 1...20) {
@@ -271,15 +311,16 @@ struct RoutineEditorView: View {
         }
     }
 
-    /// A routine belongs to exactly one list, so this is a single choice rather
-    /// than the multi-select the old tags needed.
-    private var listSection: some View {
+    /// The routine's one list, and its tag. A routine belongs to exactly one
+    /// list; the tag is what lets smart lists gather it alongside routines
+    /// from other lists.
+    private var organizationSection: some View {
         Section {
             Picker(selection: $draft.listID) {
                 Text("None", comment: "The option for a routine that belongs to no list")
                     .tag(PersistentIdentifier?.none)
 
-                ForEach(lists) { list in
+                ForEach(assignableLists) { list in
                     Label {
                         Text(list.name)
                     } icon: {
@@ -291,12 +332,14 @@ struct RoutineEditorView: View {
             } label: {
                 Text("List", comment: "Row that chooses the routine's list")
             }
+
+            TagField(tag: $draft.tag, suggestions: RoutineTag.all(in: routines))
         } header: {
             Text("List", comment: "Row that chooses the routine's list")
         } footer: {
             Text(
-                "Workouts are started from a list, and cover every routine in it.",
-                comment: "Explains the relationship between lists and workouts"
+                "Workouts are started from a list. A tag gathers routines from any list into a smart list.",
+                comment: "Explains lists and tags in the routine editor"
             )
         }
     }
@@ -340,6 +383,19 @@ struct RoutineEditorView: View {
         }
     }
 
+    /// Today's progress, as the detail view used to show under the name.
+    private func todayDescription(for routine: Routine) -> Text {
+        let done = routine.completedCount(on: dayTracker.today)
+        let target = routine.dailyTarget
+
+        if target > 1 {
+            return Text("\(done) of \(target) done today", comment: "Accessibility value for today's progress")
+        }
+        return done > 0
+            ? Text("Done today", comment: "Accessibility value when today is complete")
+            : Text("Not done today", comment: "Accessibility value when today is incomplete")
+    }
+
     // MARK: - Actions
 
     private func loadPhoto(from selection: PhotosPickerItem?) async {
@@ -359,25 +415,33 @@ struct RoutineEditorView: View {
         case .existing(let routine):
             draft.apply(to: routine, availableLists: lists)
         }
-        dismiss()
+        finish()
     }
 
     private func deleteRoutine() {
-        if case .existing(let routine) = target {
+        if let routine = existingRoutine {
             RoutineStore.delete(routine, in: context)
         }
-        dismiss()
-        onDelete?()
+        finish()
+    }
+
+    private func finish() {
+        if let onFinish {
+            onFinish()
+        } else {
+            dismiss()
+        }
     }
 }
 
 #if DEBUG
 // The editor takes its navigation from whatever presents it, so the previews
-// supply a stack the way the detail pane and the add sheet do.
+// supply a stack the way the sheet and the Mac panel do.
 #Preview("Edit") {
     NavigationStack {
         RoutineEditorView(target: .existing(PreviewData.sampleRoutine))
     }
+    .environment(DayTracker())
     .modelContainer(PreviewData.container)
 }
 
@@ -385,6 +449,19 @@ struct RoutineEditorView: View {
     NavigationStack {
         RoutineEditorView(target: .new)
     }
+    .environment(DayTracker())
     .modelContainer(PreviewData.container)
+}
+
+// The width of the Mac panel, where the editor sits beside the list.
+#Preview("Mac Panel Width") {
+    NavigationStack {
+        RoutineEditorView(target: .existing(PreviewData.sampleRoutine), onFinish: {})
+    }
+    .environment(DayTracker())
+    .modelContainer(PreviewData.container)
+    .environment(\.locale, Locale(identifier: "he_IL"))
+    .environment(\.layoutDirection, .rightToLeft)
+    .frame(width: 340, height: 720)
 }
 #endif

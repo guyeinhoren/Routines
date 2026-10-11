@@ -5,5 +5,14 @@
 "CALENDAR_SYNC_TITLE" = "Add to Calendar";
 
 "TIMER_GROUP" = "Timer";
-"TIMER_FOOTER" = "Running a routine's timer to the end records one repetition for today.";
+"TIMER_FOOTER" = "Running a routine's timer to the end records one repetition for today. Keeping the screen on uses more battery.";
 "TIMER_COMPLETION_TITLE" = "Finished Timer Counts as Done";
+"TIMER_SOUND_TITLE" = "Sound When Done";
+"TIMER_SOUND_GENTLE" = "Gentle Chime";
+"TIMER_SOUND_LOUD" = "Loud Ring";
+"TIMER_SOUND_OFF" = "None";
+"KEEP_SCREEN_ON_TITLE" = "Keep Screen On";
+
+"WELCOME_GROUP" = "Welcome";
+"WELCOME_FOOTER" = "Shows the welcome screen the next time you open Routines.";
+"WELCOME_AGAIN_TITLE" = "Show Welcome Screen";

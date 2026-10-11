@@ -2,46 +2,96 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<key>StringsTable</key>
-	<string>Root</string>
 	<key>PreferenceSpecifiers</key>
 	<array>
 		<dict>
-			<key>Type</key>
-			<string>PSGroupSpecifier</string>
-			<key>Title</key>
-			<string>WORKOUTS_GROUP</string>
 			<key>FooterText</key>
 			<string>WORKOUTS_FOOTER</string>
-		</dict>
-		<dict>
-			<key>Type</key>
-			<string>PSToggleSwitchSpecifier</string>
 			<key>Title</key>
-			<string>CALENDAR_SYNC_TITLE</string>
-			<key>Key</key>
-			<string>syncWorkoutsToCalendar</string>
-			<key>DefaultValue</key>
-			<false/>
-		</dict>
-		<dict>
+			<string>WORKOUTS_GROUP</string>
 			<key>Type</key>
 			<string>PSGroupSpecifier</string>
-			<key>Title</key>
-			<string>TIMER_GROUP</string>
-			<key>FooterText</key>
-			<string>TIMER_FOOTER</string>
 		</dict>
 		<dict>
+			<key>DefaultValue</key>
+			<false/>
+			<key>Key</key>
+			<string>syncWorkoutsToCalendar</string>
+			<key>Title</key>
+			<string>CALENDAR_SYNC_TITLE</string>
 			<key>Type</key>
 			<string>PSToggleSwitchSpecifier</string>
+		</dict>
+		<dict>
+			<key>FooterText</key>
+			<string>TIMER_FOOTER</string>
 			<key>Title</key>
-			<string>TIMER_COMPLETION_TITLE</string>
-			<key>Key</key>
-			<string>timerCountsAsCompletion</string>
+			<string>TIMER_GROUP</string>
+			<key>Type</key>
+			<string>PSGroupSpecifier</string>
+		</dict>
+		<dict>
 			<key>DefaultValue</key>
 			<true/>
+			<key>Key</key>
+			<string>timerCountsAsCompletion</string>
+			<key>Title</key>
+			<string>TIMER_COMPLETION_TITLE</string>
+			<key>Type</key>
+			<string>PSToggleSwitchSpecifier</string>
+		</dict>
+		<dict>
+			<key>DefaultValue</key>
+			<string>gentle</string>
+			<key>Key</key>
+			<string>timerSound</string>
+			<key>Title</key>
+			<string>TIMER_SOUND_TITLE</string>
+			<key>Type</key>
+			<string>PSMultiValueSpecifier</string>
+			<key>Titles</key>
+			<array>
+				<string>TIMER_SOUND_GENTLE</string>
+				<string>TIMER_SOUND_LOUD</string>
+				<string>TIMER_SOUND_OFF</string>
+			</array>
+			<key>Values</key>
+			<array>
+				<string>gentle</string>
+				<string>loud</string>
+				<string>off</string>
+			</array>
+		</dict>
+		<dict>
+			<key>DefaultValue</key>
+			<false/>
+			<key>Key</key>
+			<string>keepScreenOnDuringTimer</string>
+			<key>Title</key>
+			<string>KEEP_SCREEN_ON_TITLE</string>
+			<key>Type</key>
+			<string>PSToggleSwitchSpecifier</string>
+		</dict>
+		<dict>
+			<key>FooterText</key>
+			<string>WELCOME_FOOTER</string>
+			<key>Title</key>
+			<string>WELCOME_GROUP</string>
+			<key>Type</key>
+			<string>PSGroupSpecifier</string>
+		</dict>
+		<dict>
+			<key>DefaultValue</key>
+			<false/>
+			<key>Key</key>
+			<string>showWelcomeAgain</string>
+			<key>Title</key>
+			<string>WELCOME_AGAIN_TITLE</string>
+			<key>Type</key>
+			<string>PSToggleSwitchSpecifier</string>
 		</dict>
 	</array>
+	<key>StringsTable</key>
+	<string>Root</string>
 </dict>
 </plist>

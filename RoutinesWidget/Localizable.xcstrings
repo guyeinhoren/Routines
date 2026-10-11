@@ -1,0 +1,18 @@
+{
+  "sourceLanguage" : "en",
+  "strings" : {
+    "Done" : {
+      "comment" : "Live Activity status once a routine's timer has ended"
+    },
+    "Paused" : {
+      "comment" : "Live Activity status while a routine's timer is paused"
+    },
+    "Timer" : {
+      "comment" : "Live Activity status while a routine's timer runs"
+    },
+    "Workout" : {
+      "comment" : "Live Activity status while a workout runs"
+    }
+  },
+  "version" : "1.3"
+}
