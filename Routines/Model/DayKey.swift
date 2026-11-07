@@ -11,7 +11,7 @@ import Foundation
 /// Completions are stored against this integer rather than a `Date` because a
 /// stored `Date` shifts which day it belongs to when the person travels across
 /// time zones, and because integer comparisons keep SwiftData predicates simple.
-struct DayKey: Hashable, Codable, Comparable, Sendable {
+nonisolated struct DayKey: Hashable, Codable, Comparable, Sendable {
     let value: Int
 
     init(value: Int) {

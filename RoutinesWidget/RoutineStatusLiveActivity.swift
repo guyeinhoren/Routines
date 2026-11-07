@@ -116,6 +116,19 @@ private struct WeekSquares: View {
     let tint: Color
     let side: CGFloat
 
+    @Environment(\.colorScheme) private var colorScheme
+
+    /// An empty square, drawn from explicit colours rather than `.primary`: on
+    /// the Lock Screen's dark card the system's own fills all but vanished,
+    /// leaving only the squares that had been filled.
+    private var emptyFill: Color {
+        colorScheme == .dark ? Color.white.opacity(0.22) : Color.black.opacity(0.10)
+    }
+
+    private var emptyOutline: Color {
+        colorScheme == .dark ? Color.white.opacity(0.35) : Color.black.opacity(0.18)
+    }
+
     var body: some View {
         HStack(spacing: 6) {
             ForEach(Array(state.weekProgress.enumerated()), id: \.offset) { index, progress in
@@ -136,14 +149,16 @@ private struct WeekSquares: View {
         let shape = RoundedRectangle(cornerRadius: side * 0.3, style: .continuous)
 
         return ZStack(alignment: .bottom) {
-            shape.fill(Color.primary.opacity(0.12))
+            shape.fill(emptyFill)
             Rectangle()
                 .fill(tint)
                 .frame(height: side * max(0, min(1, progress)))
         }
         .clipShape(shape)
         .overlay {
-            shape.strokeBorder(isToday ? tint : .clear, lineWidth: 2)
+            // Today's ring in the routine's colour; the others get a hairline
+            // so an empty square still has an edge.
+            shape.strokeBorder(isToday ? tint : emptyOutline, lineWidth: isToday ? 2 : 0.75)
         }
         .frame(width: side, height: side)
         // A bigger target around today's square than its drawing, since it's

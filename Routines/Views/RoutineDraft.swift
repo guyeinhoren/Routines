@@ -42,8 +42,23 @@ struct RoutineDraft {
     /// The list the routine belongs to, or `nil` for none.
     var listID: PersistentIdentifier?
 
+    /// The tags as typed, comma-separated. Split into separate tags on save.
+    var tag: String = ""
+
+    /// Whether the routine carries a number — a weight, say — beside its name.
+    var tracksValue: Bool = false
+    var value: Double?
+    var valueUnit: String = ""
+
+    /// A routine added from a smart list takes that list's tag rather than
+    /// membership — a smart list has no members — so it shows up where it was
+    /// added.
     init(defaultList: RoutineList? = nil) {
-        listID = defaultList?.persistentModelID
+        if let defaultList, let smartTag = defaultList.smartTag {
+            tag = smartTag
+        } else {
+            listID = defaultList?.persistentModelID
+        }
     }
 
     init(routine: Routine) {
@@ -58,6 +73,10 @@ struct RoutineDraft {
         durationSeconds = routine.isTimed ? routine.durationSeconds : 300
         repetitionsPerDay = routine.dailyTarget
         listID = routine.list?.persistentModelID
+        tag = routine.tag
+        tracksValue = routine.tracksValue
+        value = routine.currentValue
+        valueUnit = routine.valueUnit
     }
 
     var trimmedName: String {
@@ -80,7 +99,10 @@ struct RoutineDraft {
         return max(1, durationSeconds)
     }
 
-    func apply(to routine: Routine, availableLists: [RoutineList]) {
+    /// Writes the draft into `routine`. A number that differs from the stored
+    /// one is also recorded in the routine's history against `today`, which
+    /// is what the value chart plots; `routine` must already be in `context`.
+    func apply(to routine: Routine, availableLists: [RoutineList], today: DayKey, in context: ModelContext) {
         routine.name = trimmedName
         routine.setDetails(details)
         routine.symbolName = symbolName
@@ -88,6 +110,13 @@ struct RoutineDraft {
         routine.imageData = imageData
         routine.durationSeconds = totalDurationSeconds
         routine.repetitionsPerDay = max(1, repetitionsPerDay)
-        routine.list = availableLists.first { $0.persistentModelID == listID }
+        routine.list = availableLists.first { $0.persistentModelID == listID && !$0.isSmart }
+        routine.tag = RoutineTag.joined(RoutineTag.split(tag))
+
+        routine.tracksValue = tracksValue
+        routine.valueUnit = valueUnit.trimmingCharacters(in: .whitespacesAndNewlines)
+        if tracksValue, value != routine.currentValue {
+            RoutineStore.setValue(value, for: routine, on: today, in: context)
+        }
     }
 }

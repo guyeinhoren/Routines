@@ -26,7 +26,7 @@ nonisolated struct AdvanceRoutineIntent: LiveActivityIntent {
 
     @MainActor
     func perform() async throws -> some IntentResult {
-        RoutineStatusActivity.advance(routineID: routineID)
+        await RoutineStatusActivity.advance(routineID: routineID)
         return .result()
     }
 }

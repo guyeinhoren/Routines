@@ -22,7 +22,6 @@ struct RoutineListsView: View {
 
     @Environment(\.modelContext) private var context
     @Environment(DayTracker.self) private var dayTracker
-    @Environment(WorkoutController.self) private var workout
 
     @Query(sort: [SortDescriptor(\RoutineList.sortIndex), SortDescriptor(\RoutineList.createdAt)])
     private var lists: [RoutineList]
@@ -56,19 +55,21 @@ struct RoutineListsView: View {
                 }
             }
             .toolbar {
-                // The Mac keeps "Add List" at the foot of the sidebar instead,
-                // where Reminders puts it.
+                // Floating at the foot of the screen, where Reminders puts
+                // "Add List". The Mac keeps it at the foot of the sidebar.
                 #if !os(macOS)
-                ToolbarItem(placement: .primaryAction) {
-                    Button {
-                        editorTarget = .new
+                ToolbarSpacer(.flexible, placement: .bottomBar)
+                ToolbarItem(placement: .bottomBar) {
+                    Menu {
+                        newListButtons
                     } label: {
                         Label {
-                            Text("New List", comment: "List editor title when creating")
+                            Text("Add List", comment: "Sidebar button that creates a list")
                         } icon: {
                             Image(systemName: "plus")
                         }
                     }
+                    .buttonStyle(.glassProminent)
                 }
                 #endif
             }
@@ -93,7 +94,6 @@ struct RoutineListsView: View {
                 )
             }
             .task {
-                workout.restoreActiveSession(in: context)
                 await dayTracker.run()
             }
     }
@@ -116,10 +116,33 @@ struct RoutineListsView: View {
         #endif
     }
 
-    #if os(macOS)
-    private var addListButton: some View {
+    /// The two kinds of list the add button offers.
+    @ViewBuilder private var newListButtons: some View {
         Button {
             editorTarget = .new
+        } label: {
+            Label {
+                Text("New List", comment: "List editor title when creating")
+            } icon: {
+                Image(systemName: "list.bullet")
+            }
+        }
+
+        Button {
+            editorTarget = .newSmart
+        } label: {
+            Label {
+                Text("New Smart List", comment: "List editor title when creating a smart list")
+            } icon: {
+                Image(systemName: "number")
+            }
+        }
+    }
+
+    #if os(macOS)
+    private var addListButton: some View {
+        Menu {
+            newListButtons
         } label: {
             Label {
                 Text("Add List", comment: "Sidebar button that creates a list")
@@ -129,7 +152,9 @@ struct RoutineListsView: View {
             .frame(maxWidth: .infinity, alignment: .leading)
             .contentShape(.rect)
         }
+        .menuStyle(.button)
         .buttonStyle(.plain)
+        .menuIndicator(.hidden)
         .foregroundStyle(.secondary)
         .padding(.horizontal, 16)
         .padding(.vertical, 10)
@@ -171,6 +196,9 @@ struct RoutineListsView: View {
                     ForEach(unpinnedLists) { list in
                         NavigationLink(value: ListDestination.list(list.persistentModelID)) {
                             summaryRow(for: list)
+                        }
+                        .dropDestination(for: RoutineTransfer.self) { items, _ in
+                            receive(items, into: list)
                         }
                         .contextMenu {
                             listActions(for: list)
@@ -255,18 +283,41 @@ struct RoutineListsView: View {
     @ViewBuilder private func tile(for list: RoutineList?) -> some View {
         if let list {
             let destination = ListDestination.list(list.persistentModelID)
+            let tile = ListTile(
+                title: Text(list.name),
+                symbolName: list.symbolName,
+                tint: list.color,
+                count: list.routineCount(among: routines),
+                isSelected: selection == destination
+            )
+            #if os(macOS)
             tileButton(to: destination) {
-                ListTile(
-                    title: Text(list.name),
-                    symbolName: list.symbolName,
-                    tint: list.color,
-                    count: list.routineCount,
-                    isSelected: selection == destination
-                )
+                tile
             }
             .contextMenu {
                 listActions(for: list)
             }
+            .dropDestination(for: RoutineTransfer.self) { items, _ in
+                receive(items, into: list)
+            }
+            #else
+            // A menu of its own rather than `contextMenu`. Every tile shares
+            // one list row, and iOS gives a row a single context menu — the
+            // first tile's — so long-pressing any tile acted on that one.
+            Menu {
+                listActions(for: list)
+            } label: {
+                tile
+            } primaryAction: {
+                open(destination)
+            }
+            .menuStyle(.button)
+            .buttonStyle(.plain)
+            .menuIndicator(.hidden)
+            .dropDestination(for: RoutineTransfer.self) { items, _ in
+                receive(items, into: list)
+            }
+            #endif
         } else {
             tileButton(to: .all) {
                 ListTile(
@@ -305,7 +356,7 @@ struct RoutineListsView: View {
 
     private func summaryRow(for list: RoutineList) -> some View {
         LabeledContent {
-            Text(list.routineCount, format: .number)
+            Text(list.routineCount(among: routines), format: .number)
                 .foregroundStyle(.secondary)
                 .monospacedDigit()
         } label: {
@@ -371,6 +422,23 @@ struct RoutineListsView: View {
         var reordered = unpinnedLists
         reordered.move(fromOffsets: source, toOffset: destination)
         RoutineStore.applyOrder(pinnedLists + reordered)
+    }
+
+    /// Routines dragged out of a list and dropped onto `list`. An ordinary list
+    /// takes them as members; a smart list has none, so it gives them its tag
+    /// instead, which is what makes a routine show up there.
+    private func receive(_ items: [RoutineTransfer], into list: RoutineList) {
+        let ids = Set(items.map(\.id))
+        withAnimation {
+            for routine in routines where ids.contains(routine.persistentModelID) {
+                if let smartTag = list.smartTag {
+                    guard !routine.belongs(to: list) else { continue }
+                    routine.tag = RoutineTag.joined(routine.tags + [smartTag])
+                } else {
+                    routine.list = list
+                }
+            }
+        }
     }
 
     private func confirmDeletion(of list: RoutineList) {

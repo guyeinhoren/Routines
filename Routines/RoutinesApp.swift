@@ -8,6 +8,9 @@ import SwiftUI
 
 @main
 struct RoutinesApp: App {
+    /// Shared with the Live Activity's button, which runs without a window.
+    private let modelContainer = RoutineContainer.shared
+
     init() {
         SettingsKey.registerDefaults()
     }
@@ -26,12 +29,7 @@ struct RoutinesApp: App {
         .windowToolbarStyle(.unified(showsTitle: false))
         .defaultSize(width: 980, height: 640)
         #endif
-        .modelContainer(for: [
-            Routine.self,
-            RoutineList.self,
-            RoutineCompletion.self,
-            WorkoutSession.self,
-        ])
+        .modelContainer(modelContainer)
 
         // iOS and iPadOS surface the app's preferences through Settings.bundle
         // in the system Settings app. The Mac has no equivalent, so it gets a

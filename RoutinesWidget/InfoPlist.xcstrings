@@ -10,6 +10,12 @@
             "state" : "new",
             "value" : "Routines"
           }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "רוטינות"
+          }
         }
       }
     },
@@ -21,6 +27,12 @@
           "stringUnit" : {
             "state" : "new",
             "value" : "RoutinesWidgetExtension"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "רוטינות"
           }
         }
       }

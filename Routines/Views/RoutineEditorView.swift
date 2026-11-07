@@ -39,18 +39,30 @@ struct RoutineEditorView: View {
     @State private var detailsSelection = AttributedTextSelection()
 
     /// Called instead of `dismiss` when the editor closes — after saving,
-    /// cancelling or deleting. The Mac shows the editor in a panel beside the
-    /// list rather than presenting it, and a panel can't be dismissed.
+    /// cancelling or deleting. The Mac shows the editor in a popover beside the
+    /// routine, which its presenter closes rather than the editor.
     private let onFinish: (() -> Void)?
+
+    /// Whether closing the editor some other way than its buttons keeps the
+    /// changes. The Mac popover closes when the person clicks elsewhere, and
+    /// there, as in Reminders and Calendar, that keeps what was typed rather
+    /// than throwing it away.
+    private let savesOnClose: Bool
+
+    /// Set once Cancel, Done or Delete has closed the editor, so closing it
+    /// doesn't also save on top of what they did.
+    @State private var isFinished = false
 
     /// Pre-selects the list a new routine is being created from, so adding one
     /// inside a list doesn't need the list picked again.
     init(
         target: RoutineEditorTarget,
         defaultList: RoutineList? = nil,
+        savesOnClose: Bool = false,
         onFinish: (() -> Void)? = nil
     ) {
         self.target = target
+        self.savesOnClose = savesOnClose
         self.onFinish = onFinish
         switch target {
         case .new:
@@ -74,8 +86,8 @@ struct RoutineEditorView: View {
         lists.filter { !$0.isSmart }
     }
 
-    /// In the Mac's side panel the window toolbar belongs to the list, so the
-    /// editor's own buttons go at the foot of the panel instead.
+    /// A Mac popover has no toolbar of its own, so the editor's buttons go at
+    /// its foot instead.
     private var usesInlineActions: Bool {
         #if os(macOS)
         onFinish != nil
@@ -85,15 +97,19 @@ struct RoutineEditorView: View {
     }
 
     // The caller supplies the navigation — a stack inside the sheet on iPhone,
-    // or inside the side panel on the Mac.
+    // or inside the popover on the Mac.
     var body: some View {
         Form {
             identitySection
             detailsSection
+            valueSection
             scheduleSection
             organizationSection
 
             if let routine = existingRoutine {
+                if draft.tracksValue, !(routine.measurements ?? []).isEmpty {
+                    valueHistorySection(for: routine)
+                }
                 historySection(for: routine)
                 deleteSection
             }
@@ -126,6 +142,10 @@ struct RoutineEditorView: View {
         }
         .onChange(of: photoSelection) { _, selection in
             Task { await loadPhoto(from: selection) }
+        }
+        .onDisappear {
+            guard savesOnClose, !isFinished, draft.isSaveable, let routine = existingRoutine else { return }
+            draft.apply(to: routine, availableLists: lists, today: dayTracker.today, in: context)
         }
     }
 
@@ -187,6 +207,9 @@ struct RoutineEditorView: View {
                     Text("Name", comment: "Label for the routine name field")
                 }
                 .font(.headline)
+                // The prompt already says what goes here; a visible label would
+                // push the name to the far side of the row on the Mac.
+                .labelsHidden()
                 #if !os(macOS)
                 .textInputAutocapitalization(.sentences)
                 #endif
@@ -277,6 +300,68 @@ struct RoutineEditorView: View {
         .accessibilityLabel(Text("Choose Symbol", comment: "VoiceOver label for the symbol preview button"))
     }
 
+    /// An optional number for the routine, such as a weight: shown beside the
+    /// name on the main screen and charted over time. Off unless asked for.
+    private var valueSection: some View {
+        Section {
+            Toggle(isOn: $draft.tracksValue.animation()) {
+                Text("Track a Number", comment: "Switch that gives the routine a number such as a weight")
+            }
+
+            if draft.tracksValue {
+                LabeledContent {
+                    TextField(
+                        value: $draft.value,
+                        format: .number,
+                        prompt: Text("0", comment: "Placeholder for the routine's number")
+                    ) {
+                        Text("Number", comment: "Label for the routine's number field")
+                    }
+                    .multilineTextAlignment(.trailing)
+                    #if !os(macOS)
+                    // The number pad with a decimal point, so a weight is
+                    // typed without switching keyboards.
+                    .keyboardType(.decimalPad)
+                    #endif
+                } label: {
+                    Text("Number", comment: "Label for the routine's number field")
+                }
+
+                LabeledContent {
+                    TextField(
+                        text: $draft.valueUnit,
+                        prompt: Text("kg", comment: "Placeholder for the unit of the routine's number, such as kilograms")
+                    ) {
+                        Text("Unit", comment: "Label for the unit of the routine's number")
+                    }
+                    .multilineTextAlignment(.trailing)
+                    #if !os(macOS)
+                    .textInputAutocapitalization(.never)
+                    .autocorrectionDisabled()
+                    #endif
+                } label: {
+                    Text("Unit", comment: "Label for the unit of the routine's number")
+                }
+            }
+        } footer: {
+            if draft.tracksValue {
+                Text(
+                    "Shown beside the routine's name. Each day you change it is added to the chart below.",
+                    comment: "Explains the routine's number"
+                )
+            }
+        }
+    }
+
+    /// The chart of the routine's number over time.
+    private func valueHistorySection(for routine: Routine) -> some View {
+        Section {
+            ValueHistoryChart(routine: routine)
+        } header: {
+            Text("Number History", comment: "Section header for the chart of the routine's number")
+        }
+    }
+
     private var scheduleSection: some View {
         Section {
             Stepper(value: $draft.repetitionsPerDay, in: 1...20) {
@@ -299,7 +384,7 @@ struct RoutineEditorView: View {
         } footer: {
             if draft.isTimed {
                 Text(
-                    "A timed routine gets a play button on the main screen.",
+                    "Start a timed routine's timer with Start Timer, at the top of its details.",
                     comment: "Explains what the Timed switch enables"
                 )
             } else if draft.repetitionsPerDay > 1 {
@@ -333,12 +418,12 @@ struct RoutineEditorView: View {
                 Text("List", comment: "Row that chooses the routine's list")
             }
 
-            TagField(tag: $draft.tag, suggestions: RoutineTag.all(in: routines))
+            TagField(tag: $draft.tag, routines: routines, allowsMultiple: true)
         } header: {
             Text("List", comment: "Row that chooses the routine's list")
         } footer: {
             Text(
-                "Workouts are started from a list. A tag gathers routines from any list into a smart list.",
+                "Separate tags with commas. Each tag gathers routines from any list into a smart list.",
                 comment: "Explains lists and tags in the routine editor"
             )
         }
@@ -411,9 +496,9 @@ struct RoutineEditorView: View {
         case .new:
             let routine = Routine(sortIndex: RoutineStore.nextSortIndex(after: routines))
             context.insert(routine)
-            draft.apply(to: routine, availableLists: lists)
+            draft.apply(to: routine, availableLists: lists, today: dayTracker.today, in: context)
         case .existing(let routine):
-            draft.apply(to: routine, availableLists: lists)
+            draft.apply(to: routine, availableLists: lists, today: dayTracker.today, in: context)
         }
         finish()
     }
@@ -426,6 +511,7 @@ struct RoutineEditorView: View {
     }
 
     private func finish() {
+        isFinished = true
         if let onFinish {
             onFinish()
         } else {
@@ -436,7 +522,7 @@ struct RoutineEditorView: View {
 
 #if DEBUG
 // The editor takes its navigation from whatever presents it, so the previews
-// supply a stack the way the sheet and the Mac panel do.
+// supply a stack the way the sheet and the Mac popover do.
 #Preview("Edit") {
     NavigationStack {
         RoutineEditorView(target: .existing(PreviewData.sampleRoutine))
@@ -453,8 +539,8 @@ struct RoutineEditorView: View {
     .modelContainer(PreviewData.container)
 }
 
-// The width of the Mac panel, where the editor sits beside the list.
-#Preview("Mac Panel Width") {
+// The width of the Mac popover, where the editor opens beside a routine.
+#Preview("Mac Popover Width") {
     NavigationStack {
         RoutineEditorView(target: .existing(PreviewData.sampleRoutine), onFinish: {})
     }
@@ -463,5 +549,16 @@ struct RoutineEditorView: View {
     .environment(\.locale, Locale(identifier: "he_IL"))
     .environment(\.layoutDirection, .rightToLeft)
     .frame(width: 340, height: 720)
+}
+
+#Preview("Mac Popover Width LTR") {
+    NavigationStack {
+        RoutineEditorView(target: .existing(PreviewData.sampleRoutine), onFinish: {})
+    }
+    .environment(DayTracker())
+    .modelContainer(PreviewData.container)
+    .environment(\.locale, Locale(identifier: "en_US"))
+    .environment(\.layoutDirection, .leftToRight)
+    .frame(width: 340, height: 1400)
 }
 #endif

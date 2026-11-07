@@ -6,11 +6,12 @@
 import SwiftData
 import Foundation
 
-/// A stretch of time spent working through the routines of one list.
+/// A stretch of time once spent working through the routines of one list.
 ///
-/// The session is persisted rather than held in memory so an in-progress
-/// workout survives the app being force quit and can still be ended — and
-/// written to the calendar — afterwards.
+/// Retired: the app no longer starts workouts or writes them to Calendar. The
+/// model stays in the schema only so stores that already hold sessions — on
+/// this device or in iCloud — keep opening without a migration. Nothing reads
+/// or writes it any more.
 @Model
 final class WorkoutSession {
     var startDate: Date = Date()

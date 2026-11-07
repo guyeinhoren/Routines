@@ -15,11 +15,11 @@ struct RoutineListEditorView: View {
         case newSmart
         case existing(RoutineList)
 
-        var id: String {
+        var id: AnyHashable {
             switch self {
             case .new: "new"
             case .newSmart: "newSmart"
-            case .existing(let list): "\(list.persistentModelID.hashValue)"
+            case .existing(let list): list.persistentModelID
             }
         }
     }
@@ -80,18 +80,16 @@ struct RoutineListEditorView: View {
         name.trimmingCharacters(in: .whitespacesAndNewlines)
     }
 
+    /// A smart list gathers a single tag, so anything after a comma is
+    /// dropped rather than producing a tag no routine could ever match.
     private var normalizedTag: String {
-        RoutineTag.normalized(tag)
+        RoutineTag.split(tag).first ?? ""
     }
 
     /// A smart list may go unnamed — it then takes its tag's name — but it
     /// can't go without a tag, which is the whole of what it shows.
     private var isSaveable: Bool {
         isSmart ? !normalizedTag.isEmpty : !trimmedName.isEmpty
-    }
-
-    private var existingTags: [String] {
-        RoutineTag.all(in: routines)
     }
 
     var body: some View {
@@ -176,7 +174,7 @@ struct RoutineListEditorView: View {
     /// The tag a smart list gathers: typed, or picked from tags already in use.
     private var tagSection: some View {
         Section {
-            TagField(tag: $tag, suggestions: existingTags)
+            TagField(tag: $tag, routines: routines)
         } header: {
             Text("Tag", comment: "Header above a routine's or smart list's tag")
         } footer: {
@@ -231,11 +229,22 @@ struct RoutineListEditorView: View {
 ///
 /// Offering the existing tags matters more than it looks: a smart list only
 /// gathers routines whose tag matches, so a typo quietly leaves a routine out.
+///
+/// With `allowsMultiple`, as for a routine, the text is a comma-separated set
+/// of tags and picking a suggestion adds it to the set rather than replacing
+/// what's there.
 struct TagField: View {
     @Binding var tag: String
-    let suggestions: [String]
+
+    /// The routines whose tags are offered. Passed whole, and turned into
+    /// suggestions here, so the work happens only when this field redraws —
+    /// not on every keystroke elsewhere in the editor that hosts it.
+    let routines: [Routine]
+    var allowsMultiple = false
 
     var body: some View {
+        let suggestions = otherSuggestions
+
         HStack {
             Image(systemName: "number")
                 .foregroundStyle(.secondary)
@@ -243,7 +252,9 @@ struct TagField: View {
 
             TextField(
                 text: $tag,
-                prompt: Text("Tag", comment: "Placeholder for a tag")
+                prompt: allowsMultiple
+                    ? Text("Tags, separated by commas", comment: "Placeholder for a routine's tags")
+                    : Text("Tag", comment: "Placeholder for a tag")
             ) {
                 Text("Tag", comment: "Header above a routine's or smart list's tag")
             }
@@ -252,11 +263,11 @@ struct TagField: View {
             #endif
             .autocorrectionDisabled()
 
-            if !otherSuggestions.isEmpty {
+            if !suggestions.isEmpty {
                 Menu {
-                    ForEach(otherSuggestions, id: \.self) { suggestion in
+                    ForEach(suggestions, id: \.self) { suggestion in
                         Button(suggestion) {
-                            tag = suggestion
+                            add(suggestion)
                         }
                     }
                 } label: {
@@ -269,8 +280,19 @@ struct TagField: View {
         }
     }
 
-    /// The suggestions other than the one already entered.
+    /// The tags in use other than the ones already entered.
     private var otherSuggestions: [String] {
-        suggestions.filter { !RoutineTag.matches($0, tag) }
+        let entered = RoutineTag.split(tag)
+        return RoutineTag.all(in: routines).filter { suggestion in
+            !entered.contains { RoutineTag.matches($0, suggestion) }
+        }
+    }
+
+    private func add(_ suggestion: String) {
+        guard allowsMultiple else {
+            tag = suggestion
+            return
+        }
+        tag = RoutineTag.joined(RoutineTag.split(tag) + [suggestion])
     }
 }

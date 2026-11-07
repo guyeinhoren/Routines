@@ -6,24 +6,6 @@
 	<array>
 		<dict>
 			<key>FooterText</key>
-			<string>WORKOUTS_FOOTER</string>
-			<key>Title</key>
-			<string>WORKOUTS_GROUP</string>
-			<key>Type</key>
-			<string>PSGroupSpecifier</string>
-		</dict>
-		<dict>
-			<key>DefaultValue</key>
-			<false/>
-			<key>Key</key>
-			<string>syncWorkoutsToCalendar</string>
-			<key>Title</key>
-			<string>CALENDAR_SYNC_TITLE</string>
-			<key>Type</key>
-			<string>PSToggleSwitchSpecifier</string>
-		</dict>
-		<dict>
-			<key>FooterText</key>
 			<string>TIMER_FOOTER</string>
 			<key>Title</key>
 			<string>TIMER_GROUP</string>
@@ -72,6 +54,24 @@
 			<key>Type</key>
 			<string>PSToggleSwitchSpecifier</string>
 		</dict>
+			<dict>
+				<key>FooterText</key>
+				<string>LIVE_ACTIVITY_FOOTER</string>
+				<key>Title</key>
+				<string>LIVE_ACTIVITY_GROUP</string>
+				<key>Type</key>
+				<string>PSGroupSpecifier</string>
+			</dict>
+			<dict>
+				<key>DefaultValue</key>
+				<true/>
+				<key>Key</key>
+				<string>showRoutineLiveActivity</string>
+				<key>Title</key>
+				<string>LIVE_ACTIVITY_TITLE</string>
+				<key>Type</key>
+				<string>PSToggleSwitchSpecifier</string>
+			</dict>
 		<dict>
 			<key>FooterText</key>
 			<string>WELCOME_FOOTER</string>

@@ -16,7 +16,6 @@ struct ContentView: View {
     @Environment(\.modelContext) private var context
 
     @State private var dayTracker = DayTracker()
-    @State private var workout = WorkoutController()
 
     #if os(macOS)
     @State private var selection: ListDestination?
@@ -29,19 +28,55 @@ struct ContentView: View {
     /// out of the app switcher, which is exactly the relaunch this is for.
     @AppStorage(SettingsKey.lastOpenedList) private var lastOpenedList: Data?
 
+    @AppStorage(SettingsKey.hasSeenWelcome) private var hasSeenWelcome = false
+    @AppStorage(SettingsKey.showWelcomeAgain) private var showWelcomeAgain = false
+    @State private var isShowingWelcome = false
+
     var body: some View {
         navigation
             .environment(dayTracker)
-            .environment(workout)
             .task {
                 restoreLastOpenedList()
+                presentWelcomeIfDue()
+            }
+            .onOpenURL { url in
+                // A tap on the Live Activity opens the list it was started from.
+                guard let destination = ListDestination(url: url) else { return }
+                open(destination)
             }
             .onChange(of: scenePhase) { _, phase in
                 // The clock may have moved a long way while the app was away, so
                 // re-check which day's square should be the editable one.
                 guard phase == .active else { return }
                 dayTracker.refresh()
+                #if os(iOS)
+                // Switched off in Settings while the app was away.
+                RoutineStatusActivity.endIfDisabled()
+                #endif
+                // On iPhone the welcome screen is asked for from the Settings
+                // app, so the request is found on the way back in.
+                presentWelcomeIfDue()
             }
+            .onChange(of: showWelcomeAgain) { _, requested in
+                // The Mac asks from its Settings window while the app runs.
+                if requested { presentWelcomeIfDue() }
+            }
+            .sheet(isPresented: $isShowingWelcome) {
+                WelcomeView {
+                    isShowingWelcome = false
+                }
+                // Continue is the way out, as on Apple's own welcome screens.
+                .interactiveDismissDisabled()
+                .onDisappear {
+                    hasSeenWelcome = true
+                    showWelcomeAgain = false
+                }
+            }
+    }
+
+    private func presentWelcomeIfDue() {
+        guard !hasSeenWelcome || showWelcomeAgain, !isShowingWelcome else { return }
+        isShowingWelcome = true
     }
 
     @ViewBuilder private var navigation: some View {
@@ -81,6 +116,14 @@ struct ContentView: View {
             // whatever was actually on screen.
             remember(newPath.last)
         }
+        #endif
+    }
+
+    private func open(_ destination: ListDestination) {
+        #if os(macOS)
+        selection = destination
+        #else
+        path = [destination]
         #endif
     }
 

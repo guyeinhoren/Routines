@@ -61,17 +61,21 @@ final class TimerCompanion {
         self.endDate = endDate
         scheduleNotification(at: endDate)
         setScreenKeptAwake(UserDefaults.standard.bool(forKey: SettingsKey.keepScreenOnDuringTimer))
+        #if os(iOS)
         showActivity(
             .init(endDate: endDate, remainingSeconds: endDate.timeIntervalSinceNow, isFinished: false),
             staleDate: endDate
         )
+        #endif
     }
 
     func didPause(remaining: TimeInterval) {
         endDate = nil
         cancelNotification()
         setScreenKeptAwake(false)
+        #if os(iOS)
         showActivity(.init(endDate: nil, remainingSeconds: remaining, isFinished: false), staleDate: nil)
+        #endif
     }
 
     /// The countdown reached zero. `appIsActive` says whether the person can
@@ -102,7 +106,8 @@ final class TimerCompanion {
                 )
             }
         }
-        activity = nil
+        // Kept, so closing the timer screen can take the finished activity
+        // off the Lock Screen straight away.
         #endif
     }
 
@@ -238,17 +243,5 @@ final class TimerCompanion {
             Self.logger.error("Could not start the timer Live Activity: \(error.localizedDescription, privacy: .public)")
         }
     }
-    #else
-    private func showActivity(_ state: Never?, staleDate: Date?) {}
     #endif
 }
-
-#if !os(iOS)
-// Live Activities are iPhone-only. On the Mac the calls above take this
-// placeholder and do nothing.
-private extension Optional where Wrapped == Never {
-    init(endDate: Date?, remainingSeconds: Double, isFinished: Bool) {
-        self = nil
-    }
-}
-#endif

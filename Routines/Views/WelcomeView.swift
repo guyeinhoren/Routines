@@ -36,18 +36,18 @@ struct WelcomeView: View {
                             tint: .purple,
                             title: Text("Read Your Week at a Glance", comment: "Welcome screen point about the activity grid"),
                             detail: Text(
-                                "Each square is a day, and it fills as you record a routine. The chart button shows a month of squares in each routine's colour — the deeper the colour, the more you did. Tap a week to see its routines.",
+                                "Each square is a day, and it fills as you record a routine. The chart button shows a month of squares in the list's colour — the deeper the colour, the more routines you completed. Tap a week to see its routines.",
                                 comment: "Welcome screen explanation of how to read the squares"
                             )
                         )
 
                         WelcomePoint(
-                            systemImage: "play.circle.fill",
+                            systemImage: "timer.circle.fill",
                             tint: .blue,
-                            title: Text("Time Your Workouts", comment: "Welcome screen point about the play button"),
+                            title: Text("Time a Routine", comment: "Welcome screen point about routine timers"),
                             detail: Text(
-                                "Press play in a list to time a workout. When it ends it can go into your calendar, so you can follow your workouts over time as part of your day.",
-                                comment: "Welcome screen explanation of the play button"
+                                "Give a routine a duration, then start its timer from the routine's details. When the timer ends, it counts as one repetition for today.",
+                                comment: "Welcome screen explanation of routine timers"
                             )
                         )
                     }
@@ -78,12 +78,8 @@ struct WelcomeView: View {
 
     private var header: some View {
         VStack(spacing: 20) {
-            Image("WelcomeIcon")
-                .resizable()
-                .aspectRatio(contentMode: .fit)
+            AppIconImage()
                 .frame(width: 100, height: 100)
-                .clipShape(RoundedRectangle(cornerRadius: 23, style: .continuous))
-                .shadow(color: .black.opacity(0.12), radius: 10, y: 4)
                 .accessibilityHidden(true)
 
             Text("Welcome to “Routines”", comment: "Title of the welcome screen")
@@ -92,6 +88,46 @@ struct WelcomeView: View {
                 .fixedSize(horizontal: false, vertical: true)
         }
     }
+}
+
+/// The app's own icon, read from what's installed rather than kept as a copy,
+/// so it always matches the icon on the Home Screen or in the Dock.
+private struct AppIconImage: View {
+    var body: some View {
+        #if os(macOS)
+        // Already drawn in the Mac's icon shape, with its shadow.
+        Image(nsImage: NSApplication.shared.applicationIconImage)
+            .resizable()
+            .aspectRatio(contentMode: .fit)
+        #else
+        if let icon = Self.installedIcon {
+            Image(uiImage: icon)
+                .resizable()
+                .aspectRatio(contentMode: .fit)
+                .clipShape(RoundedRectangle(cornerRadius: 23, style: .continuous))
+                .shadow(color: .black.opacity(0.12), radius: 10, y: 4)
+        } else {
+            Image(systemName: "sunrise.fill")
+                .resizable()
+                .aspectRatio(contentMode: .fit)
+                .padding(18)
+                .foregroundStyle(.blue)
+        }
+        #endif
+    }
+
+    #if !os(macOS)
+    /// The largest of the icon images Xcode writes into the bundle, found by
+    /// the names Info.plist lists for them.
+    private static var installedIcon: UIImage? {
+        guard let icons = Bundle.main.infoDictionary?["CFBundleIcons"] as? [String: Any],
+              let primary = icons["CFBundlePrimaryIcon"] as? [String: Any],
+              let files = primary["CFBundleIconFiles"] as? [String],
+              let name = files.last
+        else { return nil }
+        return UIImage(named: name)
+    }
+    #endif
 }
 
 /// One point on the welcome screen: a symbol beside a title and a sentence.

@@ -3,16 +3,16 @@
 //  Routines
 //
 
+import SwiftUI
+
 #if os(macOS)
 import AVFoundation
-import SwiftUI
 
 /// The Mac's Settings window.
 ///
 /// Reads and writes the same defaults keys that `Settings.bundle` exposes on
 /// iOS, so a preference means the same thing on every platform.
 struct MacSettingsView: View {
-    @AppStorage(SettingsKey.syncWorkoutsToCalendar) private var syncWorkoutsToCalendar = false
     @AppStorage(SettingsKey.timerCountsAsCompletion) private var timerCountsAsCompletion = true
     @AppStorage(SettingsKey.timerSound) private var timerSound = TimerSound.gentle
     @AppStorage(SettingsKey.keepScreenOnDuringTimer) private var keepScreenOnDuringTimer = false
@@ -23,17 +23,6 @@ struct MacSettingsView: View {
 
     var body: some View {
         Form {
-            Section {
-                Toggle(isOn: $syncWorkoutsToCalendar) {
-                    Text("Add Workouts to Calendar", comment: "Preference that writes workouts to the calendar")
-                }
-            } footer: {
-                Text(
-                    "When a workout ends, an event with the list's name is added at the time the workout started.",
-                    comment: "Explains the calendar preference"
-                )
-            }
-
             Section {
                 Toggle(isOn: $timerCountsAsCompletion) {
                     Text("Finished Timer Counts as Done", comment: "Preference that records a repetition when a timer ends")

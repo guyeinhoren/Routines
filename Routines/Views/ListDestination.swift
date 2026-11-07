@@ -16,6 +16,31 @@ enum ListDestination: Hashable, Codable {
     case list(PersistentIdentifier)
 }
 
+extension ListDestination {
+    private static let urlScheme = "routines"
+
+    /// A link that reopens this screen, which the Live Activity hands to the
+    /// system so a tap on it lands on the list it came from.
+    var url: URL? {
+        guard let data = try? JSONEncoder().encode(self) else { return nil }
+        var components = URLComponents()
+        components.scheme = Self.urlScheme
+        components.host = "list"
+        components.queryItems = [URLQueryItem(name: "destination", value: data.base64EncodedString())]
+        return components.url
+    }
+
+    init?(url: URL) {
+        guard url.scheme == Self.urlScheme,
+              let components = URLComponents(url: url, resolvingAgainstBaseURL: false),
+              let encoded = components.queryItems?.first(where: { $0.name == "destination" })?.value,
+              let data = Data(base64Encoded: encoded),
+              let destination = try? JSONDecoder().decode(ListDestination.self, from: data)
+        else { return nil }
+        self = destination
+    }
+}
+
 /// Resolves a destination to its screen.
 struct ListDestinationView: View {
     let destination: ListDestination

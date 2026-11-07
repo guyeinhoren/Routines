@@ -60,11 +60,12 @@ struct DurationPicker: View {
 
     private var wheels: some View {
         #if os(macOS)
-        HStack(spacing: 16) {
+        HStack(spacing: 12) {
             menu(hoursBinding, range: 0...23, unit: hoursLabel)
             menu(minutesBinding, range: 0...59, unit: minutesLabel)
             menu(secondsBinding, range: 0...59, unit: secondsLabel)
         }
+        .frame(maxWidth: .infinity)
         #else
         HStack(spacing: 0) {
             wheel(hoursBinding, range: 0...23, unit: hoursLabel)
@@ -111,16 +112,36 @@ struct DurationPicker: View {
     #endif
 
     #if os(macOS)
+    /// One menu and its unit. The picker's own label is hidden and the unit
+    /// drawn beside it instead: inside a grouped form, a labelled picker claims
+    /// a whole label column, and three in a row came to twice the width of the
+    /// Mac's side panel.
     private func menu(_ value: Binding<Int>, range: ClosedRange<Int>, unit: Text) -> some View {
-        Picker(selection: value) {
-            ForEach(range, id: \.self) { number in
-                Text(number, format: .number).tag(number)
+        let unitLabel = unit
+            .font(.callout)
+            .foregroundStyle(.secondary)
+            .fixedSize()
+
+        return HStack(spacing: 4) {
+            if surroundingDirection == .rightToLeft {
+                unitLabel
             }
-        } label: {
-            unit
+
+            Picker(selection: value) {
+                ForEach(range, id: \.self) { number in
+                    Text(number, format: .number).tag(number)
+                }
+            } label: {
+                unit
+            }
+            .pickerStyle(.menu)
+            .labelsHidden()
+            .fixedSize()
+
+            if surroundingDirection == .leftToRight {
+                unitLabel
+            }
         }
-        .pickerStyle(.menu)
-        .fixedSize()
     }
     #endif
 

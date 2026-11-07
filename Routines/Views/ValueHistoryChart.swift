@@ -4,6 +4,7 @@
 //
 
 import Charts
+import SwiftData
 import SwiftUI
 
 /// The routine's number over time — a smooth line through one point per day it
@@ -68,6 +69,9 @@ struct ValueHistoryChart: View {
             } else {
                 chart(points: points, highlighted: highlighted)
                     .frame(height: 180)
+                    // Time runs left to right in every language, so a rising
+                    // number always reads as rising.
+                    .environment(\.layoutDirection, .leftToRight)
             }
 
             Picker(selection: $range) {

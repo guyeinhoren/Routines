@@ -1,9 +1,5 @@
 /* Settings.bundle — English */
 
-"WORKOUTS_GROUP" = "Workouts";
-"WORKOUTS_FOOTER" = "When a workout ends, an event with the list's name is added to your calendar at the time the workout started.";
-"CALENDAR_SYNC_TITLE" = "Add to Calendar";
-
 "TIMER_GROUP" = "Timer";
 "TIMER_FOOTER" = "Running a routine's timer to the end records one repetition for today. Keeping the screen on uses more battery.";
 "TIMER_COMPLETION_TITLE" = "Finished Timer Counts as Done";
@@ -12,6 +8,10 @@
 "TIMER_SOUND_LOUD" = "Loud Ring";
 "TIMER_SOUND_OFF" = "None";
 "KEEP_SCREEN_ON_TITLE" = "Keep Screen On";
+
+"LIVE_ACTIVITY_GROUP" = "Live Activity";
+"LIVE_ACTIVITY_FOOTER" = "Shows the routine you last tapped on the Lock Screen, where you can mark today's square without opening the app.";
+"LIVE_ACTIVITY_TITLE" = "Show Last Routine";
 
 "WELCOME_GROUP" = "Welcome";
 "WELCOME_FOOTER" = "Shows the welcome screen the next time you open Routines.";

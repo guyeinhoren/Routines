@@ -175,78 +175,10 @@ private struct TimerProgress: View {
     }
 }
 
-// MARK: - Workout
-
-/// The Lock Screen and Dynamic Island while a workout is underway, counting
-/// up from when it started.
-struct WorkoutLiveActivity: Widget {
-    var body: some WidgetConfiguration {
-        ActivityConfiguration(for: WorkoutActivityAttributes.self) { context in
-            let tint = ActivityColor.color(for: context.attributes.colorIdentifier)
-
-            HStack(spacing: 12) {
-                ActivitySymbol(symbolName: context.attributes.symbolName, tint: tint, size: 40)
-
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(context.attributes.listName)
-                        .font(.headline)
-                        .lineLimit(1)
-                    Text("Workout", comment: "Live Activity status while a workout runs")
-                        .font(.subheadline)
-                        .foregroundStyle(.secondary)
-                }
-
-                Spacer(minLength: 8)
-
-                Text(context.state.startDate, style: .timer)
-                    .font(.system(size: 34, weight: .semibold, design: .rounded))
-                    .monospacedDigit()
-                    .multilineTextAlignment(.trailing)
-                    .foregroundStyle(tint)
-            }
-            .padding(16)
-            .activitySystemActionForegroundColor(tint)
-        } dynamicIsland: { context in
-            let tint = ActivityColor.color(for: context.attributes.colorIdentifier)
-
-            return DynamicIsland {
-                DynamicIslandExpandedRegion(.leading) {
-                    ActivitySymbol(symbolName: context.attributes.symbolName, tint: tint, size: 44)
-                }
-                DynamicIslandExpandedRegion(.trailing) {
-                    Text(context.state.startDate, style: .timer)
-                        .font(.title2.weight(.semibold))
-                        .monospacedDigit()
-                        .multilineTextAlignment(.trailing)
-                        .foregroundStyle(tint)
-                }
-                DynamicIslandExpandedRegion(.center) {
-                    Text(context.attributes.listName)
-                        .font(.headline)
-                        .lineLimit(1)
-                }
-            } compactLeading: {
-                Image(systemName: context.attributes.symbolName)
-                    .foregroundStyle(tint)
-            } compactTrailing: {
-                Text(context.state.startDate, style: .timer)
-                    .monospacedDigit()
-                    .multilineTextAlignment(.trailing)
-                    .foregroundStyle(tint)
-                    .frame(maxWidth: 56)
-            } minimal: {
-                Image(systemName: context.attributes.symbolName)
-                    .foregroundStyle(tint)
-            }
-            .keylineTint(tint)
-        }
-    }
-}
-
 // MARK: - Shared pieces
 
 /// A symbol in a filled circle of its colour, as the app draws lists.
-private struct ActivitySymbol: View {
+struct ActivitySymbol: View {
     let symbolName: String
     let tint: Color
     let size: CGFloat
@@ -300,14 +232,4 @@ enum ActivityColor {
     RoutineTimerActivityAttributes.ContentState(endDate: Date().addingTimeInterval(420), remainingSeconds: 420, isFinished: false)
     RoutineTimerActivityAttributes.ContentState(endDate: nil, remainingSeconds: 185, isFinished: false)
     RoutineTimerActivityAttributes.ContentState(endDate: nil, remainingSeconds: 0, isFinished: true)
-}
-
-#Preview("Workout", as: .content, using: WorkoutActivityAttributes(
-    listName: "Strength",
-    symbolName: "dumbbell.fill",
-    colorIdentifier: "red"
-)) {
-    WorkoutLiveActivity()
-} contentStates: {
-    WorkoutActivityAttributes.ContentState(startDate: Date().addingTimeInterval(-754))
 }

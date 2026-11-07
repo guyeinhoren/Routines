@@ -1,9 +1,5 @@
 /* Settings.bundle — Hebrew */
 
-"WORKOUTS_GROUP" = "אימונים";
-"WORKOUTS_FOOTER" = "בסיום אימון נוסף ללוח השנה אירוע בשם הרשימה, בשעה שבה האימון התחיל.";
-"CALENDAR_SYNC_TITLE" = "הוספה ללוח השנה";
-
 "TIMER_GROUP" = "טיימר";
 "TIMER_FOOTER" = "הרצת הטיימר של רוטינה עד הסוף נרשמת כחזרה אחת עבור היום. השארת המסך דולק צורכת יותר סוללה.";
 "TIMER_COMPLETION_TITLE" = "סיום טיימר נחשב כביצוע";
@@ -12,6 +8,10 @@
 "TIMER_SOUND_LOUD" = "צלצול רועש";
 "TIMER_SOUND_OFF" = "ללא";
 "KEEP_SCREEN_ON_TITLE" = "השארת המסך דולק";
+
+"LIVE_ACTIVITY_GROUP" = "Live Activity";
+"LIVE_ACTIVITY_FOOTER" = "מציג במסך הנעילה את הרוטינה שלחצתם עליה לאחרונה, ומאפשר לסמן את ריבוע היום בלי לפתוח את האפליקציה.";
+"LIVE_ACTIVITY_TITLE" = "הצגת הרוטינה האחרונה";
 
 "WELCOME_GROUP" = "ברוכים הבאים";
 "WELCOME_FOOTER" = "מסך הפתיחה יוצג בפעם הבאה שתפתחו את ״רוטינות״.";

@@ -59,12 +59,15 @@ enum RoutineStatusActivity {
         }
     }
 
-    /// Redraws the activity if it's following `routine`.
-    static func refresh(_ routine: Routine) {
-        guard let routineID = encodedID(of: routine) else { return }
+    /// Redraws the activity if it's following `routineID`.
+    ///
+    /// Waits for the update to be handed to the system: a tap on the Live
+    /// Activity runs this with the app in the background, where returning
+    /// first would let the process be suspended before the update went out.
+    static func refresh(_ routine: Routine, routineID: String) async {
         let content = ActivityContent(state: state(for: routine), staleDate: nil)
         for activity in Activity<RoutineStatusActivityAttributes>.activities where activity.attributes.routineID == routineID {
-            Task { await activity.update(content) }
+            await activity.update(content)
         }
     }
 
@@ -81,7 +84,7 @@ enum RoutineStatusActivity {
     }
 
     /// Today's square was tapped in the Live Activity.
-    static func advance(routineID: String) {
+    static func advance(routineID: String) async {
         guard let data = Data(base64Encoded: routineID),
               let id = try? JSONDecoder().decode(PersistentIdentifier.self, from: data)
         else { return }
@@ -91,13 +94,19 @@ enum RoutineStatusActivity {
 
         RoutineStore.advance(routine, on: .today, in: context)
         try? context.save()
-        refresh(routine)
+        // The id the activity was started with, not one encoded afresh.
+        await refresh(routine, routineID: routineID)
     }
 
     // MARK: - Content
 
+    /// The same text for the same routine every time, so the id an activity
+    /// was started with can be compared with one encoded later. Sorted keys
+    /// keep the JSON from coming out in a different order.
     private static func encodedID(of routine: Routine) -> String? {
-        try? JSONEncoder().encode(routine.persistentModelID).base64EncodedString()
+        let encoder = JSONEncoder()
+        encoder.outputFormatting = .sortedKeys
+        return try? encoder.encode(routine.persistentModelID).base64EncodedString()
     }
 
     private static func state(for routine: Routine) -> RoutineStatusActivityAttributes.ContentState {

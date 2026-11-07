@@ -6,11 +6,49 @@
 	objectVersion = 110;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		E46B2C23307938CB0089297F /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E46B2C22307938CB0089297F /* WidgetKit.framework */; };
+		E46B2C25307938CB0089297F /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E46B2C24307938CB0089297F /* SwiftUI.framework */; };
+		E46B2C30307938CD0089297F /* RoutinesWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = E46B2C20307938CB0089297F /* RoutinesWidgetExtension.appex */; platformFilter = ios; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		E46B2C2E307938CD0089297F /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = E4B5E42E305E49BA008211ED /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = E46B2C1F307938CB0089297F;
+			remoteInfo = RoutinesWidgetExtension;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		E46B2C35307938CD0089297F /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			dstPath = "";
+			dstSubfolder = PlugIns;
+			files = (
+				E46B2C30307938CD0089297F /* RoutinesWidgetExtension.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXFileReference section */
+		E46B2C20307938CB0089297F /* RoutinesWidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = RoutinesWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		E46B2C22307938CB0089297F /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = /System/Library/Frameworks/WidgetKit.framework; sourceTree = "<absolute>"; };
+		E46B2C24307938CB0089297F /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = /System/Library/Frameworks/SwiftUI.framework; sourceTree = "<absolute>"; };
 		E4B5E436305E49BA008211ED /* Routines.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Routines.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		E46B2C34307938CD0089297F /* Exceptions for "RoutinesWidget" folder in "RoutinesWidgetExtension" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = E46B2C1F307938CB0089297F /* RoutinesWidgetExtension */;
+		};
 		E4B5E487305E6576008211ED /* Exceptions for "Routines" folder in "Routines" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
@@ -21,6 +59,14 @@
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
+		E46B2C26307938CB0089297F /* RoutinesWidget */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				E46B2C34307938CD0089297F /* Exceptions for "RoutinesWidget" folder in "RoutinesWidgetExtension" target */,
+			);
+			path = RoutinesWidget;
+			sourceTree = "<group>";
+		};
 		E4B5E438305E49BA008211ED /* Routines */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
@@ -32,6 +78,13 @@
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		E46B2C1D307938CB0089297F /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			files = (
+				E46B2C25307938CB0089297F /* SwiftUI.framework in Frameworks */,
+				E46B2C23307938CB0089297F /* WidgetKit.framework in Frameworks */,
+			);
+		};
 		E4B5E433305E49BA008211ED /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			files = (
@@ -40,10 +93,21 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		E46B2C21307938CB0089297F /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				E46B2C22307938CB0089297F /* WidgetKit.framework */,
+				E46B2C24307938CB0089297F /* SwiftUI.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 		E4B5E42D305E49BA008211ED = {
 			isa = PBXGroup;
 			children = (
 				E4B5E438305E49BA008211ED /* Routines */,
+				E46B2C26307938CB0089297F /* RoutinesWidget */,
+				E46B2C21307938CB0089297F /* Frameworks */,
 				E4B5E437305E49BA008211ED /* Products */,
 			);
 			sourceTree = "<group>";
@@ -52,6 +116,7 @@
 			isa = PBXGroup;
 			children = (
 				E4B5E436305E49BA008211ED /* Routines.app */,
+				E46B2C20307938CB0089297F /* RoutinesWidgetExtension.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -59,6 +124,24 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		E46B2C1F307938CB0089297F /* RoutinesWidgetExtension */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = E46B2C31307938CD0089297F /* Build configuration list for PBXNativeTarget "RoutinesWidgetExtension" */;
+			buildPhases = (
+				E46B2C1C307938CB0089297F /* Sources */,
+				E46B2C1D307938CB0089297F /* Frameworks */,
+				E46B2C1E307938CB0089297F /* Resources */,
+			);
+			buildRules = (
+			);
+			fileSystemSynchronizedGroups = (
+				E46B2C26307938CB0089297F /* RoutinesWidget */,
+			);
+			name = RoutinesWidgetExtension;
+			productName = RoutinesWidgetExtension;
+			productReference = E46B2C20307938CB0089297F /* RoutinesWidgetExtension.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
 		E4B5E435305E49BA008211ED /* Routines */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = E4B5E441305E49BC008211ED /* Build configuration list for PBXNativeTarget "Routines" */;
@@ -66,8 +149,12 @@
 				E4B5E432305E49BA008211ED /* Sources */,
 				E4B5E433305E49BA008211ED /* Frameworks */,
 				E4B5E434305E49BA008211ED /* Resources */,
+				E46B2C35307938CD0089297F /* Embed Foundation Extensions */,
 			);
 			buildRules = (
+			);
+			dependencies = (
+				E46B2C2F307938CD0089297F /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				E4B5E438305E49BA008211ED /* Routines */,
@@ -87,6 +174,9 @@
 				LastSwiftUpdateCheck = 2700;
 				LastUpgradeCheck = 2700;
 				TargetAttributes = {
+					E46B2C1F307938CB0089297F = {
+						CreatedOnToolsVersion = 27.0;
+					};
 					E4B5E435305E49BA008211ED = {
 						CreatedOnToolsVersion = 27.0;
 					};
@@ -98,6 +188,7 @@
 			knownRegions = (
 				en,
 				Base,
+				he,
 			);
 			mainGroup = E4B5E42D305E49BA008211ED;
 			minimizedProjectReferenceProxies = 1;
@@ -107,11 +198,17 @@
 			projectRoot = "";
 			targets = (
 				E4B5E435305E49BA008211ED /* Routines */,
+				E46B2C1F307938CB0089297F /* RoutinesWidgetExtension */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		E46B2C1E307938CB0089297F /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			files = (
+			);
+		};
 		E4B5E434305E49BA008211ED /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			files = (
@@ -120,6 +217,11 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		E46B2C1C307938CB0089297F /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			files = (
+			);
+		};
 		E4B5E432305E49BA008211ED /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			files = (
@@ -127,7 +229,96 @@
 		};
 /* End PBXSourcesBuildPhase section */
 
+/* Begin PBXTargetDependency section */
+		E46B2C2F307938CD0089297F /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			platformFilter = ios;
+			target = E46B2C1F307938CB0089297F /* RoutinesWidgetExtension */;
+			targetProxy = E46B2C2E307938CD0089297F /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
 /* Begin XCBuildConfiguration section */
+		E46B2C32307938CD0089297F /* Debug configuration for PBXNativeTarget "RoutinesWidgetExtension" */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 4W4M8V2959;
+				ENABLE_APP_SANDBOX = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = RoutinesWidget/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = Routines;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 27.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@executable_path/../../../../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 27.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = GuyEinhoren.Routines.RoutinesWidget;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = auto;
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Debug;
+		};
+		E46B2C33307938CD0089297F /* Release configuration for PBXNativeTarget "RoutinesWidgetExtension" */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 4W4M8V2959;
+				ENABLE_APP_SANDBOX = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = RoutinesWidget/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = Routines;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 27.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@executable_path/../../../../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 27.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = GuyEinhoren.Routines.RoutinesWidget;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = auto;
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Release;
+		};
 		E4B5E43F305E49BC008211ED /* Debug configuration for PBXProject "Routines" */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -257,12 +448,12 @@
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_OUTGOING_NETWORK_CONNECTIONS = YES;
 				ENABLE_PREVIEWS = YES;
-				ENABLE_RESOURCE_ACCESS_CALENDARS = YES;
 				ENABLE_USER_SELECTED_FILES = readonly;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Routines/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = Routines;
-				INFOPLIST_KEY_NSCalendarsWriteOnlyAccessUsageDescription = "Routines adds a calendar event when a workout ends, so it appears at the time you started it.";
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
+				INFOPLIST_KEY_NSSupportsLiveActivities = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphoneos*]" = YES;
@@ -306,12 +497,12 @@
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_OUTGOING_NETWORK_CONNECTIONS = YES;
 				ENABLE_PREVIEWS = YES;
-				ENABLE_RESOURCE_ACCESS_CALENDARS = YES;
 				ENABLE_USER_SELECTED_FILES = readonly;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Routines/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = Routines;
-				INFOPLIST_KEY_NSCalendarsWriteOnlyAccessUsageDescription = "Routines adds a calendar event when a workout ends, so it appears at the time you started it.";
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
+				INFOPLIST_KEY_NSSupportsLiveActivities = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphoneos*]" = YES;
@@ -345,6 +536,14 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		E46B2C31307938CD0089297F /* Build configuration list for PBXNativeTarget "RoutinesWidgetExtension" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				E46B2C32307938CD0089297F /* Debug configuration for PBXNativeTarget "RoutinesWidgetExtension" */,
+				E46B2C33307938CD0089297F /* Release configuration for PBXNativeTarget "RoutinesWidgetExtension" */,
+			);
+			defaultConfigurationName = Release;
+		};
 		E4B5E431305E49BA008211ED /* Build configuration list for PBXProject "Routines" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (

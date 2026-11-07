@@ -4,7 +4,7 @@
 //
 
 import SwiftData
-import Foundation
+import SwiftUI
 
 /// Mutations on routines that need a `ModelContext`.
 ///
@@ -48,8 +48,8 @@ enum RoutineStore {
     /// Rewrites `sortIndex` so the routines named by `orderedIDs` take that
     /// relative order within `all`.
     ///
-    /// `orderedIDs` may cover only part of `all` — the main screen narrows to
-    /// one tag while a workout runs. The reordered routines are slotted back
+    /// `orderedIDs` may cover only part of `all` — a list shows only its own
+    /// routines, and All moves them within one list's section. The reordered routines are slotted back
     /// into the positions that subset already occupied, so routines hidden by
     /// the filter keep their place.
     static func applyOrder(_ orderedIDs: [PersistentIdentifier], within all: [Routine]) {
@@ -86,6 +86,28 @@ enum RoutineStore {
         context.delete(routine)
     }
 
+    /// Sets the routine's number and records it against `day`, replacing any
+    /// number already recorded for that day so the history keeps one point a
+    /// day. A `nil` value clears the current number and leaves the history be.
+    static func setValue(_ value: Double?, for routine: Routine, on day: DayKey, in context: ModelContext) {
+        routine.currentValue = value
+        guard let value else { return }
+
+        let sameDay = (routine.measurements ?? []).filter { $0.dayKey == day.value }
+        if let existing = sameDay.first {
+            existing.value = value
+            // Two devices recording the same day offline can sync in two
+            // records; keep one.
+            for duplicate in sameDay.dropFirst() {
+                context.delete(duplicate)
+            }
+        } else {
+            let measurement = RoutineMeasurement(day: day, value: value)
+            context.insert(measurement)
+            measurement.routine = routine
+        }
+    }
+
     // MARK: - Lists
 
     /// The index a newly created list should take so it lands at the bottom.
@@ -105,15 +127,52 @@ enum RoutineStore {
         context.delete(list)
     }
 
-    /// The total number of repetitions recorded on `day` across `routines`,
-    /// alongside the combined daily target.
+    /// The heatmap's activity for every day from `first` through `last`,
+    /// keyed by `DayKey` value: one entry per section that had anything
+    /// completed that day — a single entry inside a list, one per list in All.
     ///
-    /// The heatmap shades a day by the ratio of these two, so a list of three
-    /// routines needs all three done to reach its darkest shade.
-    static func activity(on day: DayKey, across routines: [Routine]) -> (recorded: Int, target: Int) {
-        routines.reduce(into: (recorded: 0, target: 0)) { totals, routine in
-            totals.recorded += min(routine.completedCount(on: day), routine.dailyTarget)
-            totals.target += routine.dailyTarget
+    /// A section counts its routines fully done that day against how many it
+    /// has, so a list of three needs all three done to reach its darkest
+    /// shade. Sections with nothing done are left out, and the rest keep the
+    /// order they're shown in, so a day's stripes line up the same way every
+    /// time.
+    ///
+    /// Built for the whole range at once — one pass over each routine's
+    /// history — rather than day by day, which walked every history once for
+    /// each of a month's days.
+    static func activity(
+        from first: DayKey,
+        through last: DayKey,
+        across sections: [RoutineSection]
+    ) -> [Int: [SectionActivity]] {
+        var result: [Int: [SectionActivity]] = [:]
+
+        for section in sections {
+            var completedByDay: [Int: Int] = [:]
+            for routine in section.routines {
+                let target = routine.dailyTarget
+                for (day, count) in routine.completionCounts(from: first, through: last) where count >= target {
+                    completedByDay[day, default: 0] += 1
+                }
+            }
+
+            for (day, completed) in completedByDay {
+                result[day, default: []].append(SectionActivity(
+                    id: section.id,
+                    color: section.color,
+                    completed: completed,
+                    total: section.routines.count
+                ))
+            }
         }
+        return result
     }
+}
+
+/// How many of one section's routines were completed on a day.
+struct SectionActivity: Equatable {
+    let id: PersistentIdentifier?
+    let color: Color
+    let completed: Int
+    let total: Int
 }

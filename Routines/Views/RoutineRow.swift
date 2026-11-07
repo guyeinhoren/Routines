@@ -9,17 +9,29 @@ import SwiftUI
 /// A routine on the main screen, as a single line.
 ///
 /// The line splits into two targets: the name opens the routine's details and
-/// the squares area records a repetition for today. A timed routine also gets a
-/// play button, in a slot that is reserved either way so the square columns
-/// stay aligned down the list.
-struct RoutineRow: View {
+/// the squares area records a repetition for today. A timed routine's timer is
+/// started from its details, which leaves the name as much room as possible.
+struct RoutineRow: View, Equatable {
     let routine: Routine
-    let week: [Date]
+
+    /// The days on show, already turned into keys by the list so seven rows
+    /// don't each convert the same seven dates.
+    let week: [DayKey]
     let today: DayKey
+
+    /// Whether `week` is an earlier week picked in the activity graph rather
+    /// than this one. Today isn't on screen then, so tapping the squares
+    /// returns to this week instead of recording something invisible.
+    var isShowingPastWeek = false
+    var onReturnToCurrentWeek: () -> Void = {}
+
     let onOpenDetail: () -> Void
-    let onStartTimer: () -> Void
+
+    /// The screen the row is on, which the Live Activity reopens.
+    var destination: ListDestination = .all
 
     @Environment(\.modelContext) private var context
+    @Environment(\.locale) private var locale
 
     /// Bumped on every tap so repeated taps each produce feedback and each pop
     /// the square; a value that merely toggled would go still on the second tap.
@@ -27,82 +39,104 @@ struct RoutineRow: View {
 
     @ScaledMetric(relativeTo: .caption2) private var squareSide = RoutineRowMetrics.squareSide
 
+    /// Compares what the row draws from, leaving out the closures. A closure is
+    /// never equal to another, so without this every change on the list screen
+    /// — a selection, edit mode — would redraw every row. The routine's own
+    /// changes still redraw it, through observation.
+    static func == (lhs: RoutineRow, rhs: RoutineRow) -> Bool {
+        lhs.routine === rhs.routine
+            && lhs.week == rhs.week
+            && lhs.today == rhs.today
+            && lhs.isShowingPastWeek == rhs.isShowingPastWeek
+    }
+
     var body: some View {
+        // One pass over the routine's history for the whole week, rather than
+        // a search per square.
+        let counts = routine.completionCounts(from: week.first ?? today, through: week.last ?? today)
+
         HStack(spacing: RoutineRowMetrics.columnSpacing) {
             nameButton
-            weekStripButton
-            playSlot
+            weekStripButton(counts: counts)
         }
         .sensoryFeedback(.increase, trigger: tapCount)
     }
 
     private var nameButton: some View {
         Button(action: onOpenDetail) {
-            Text(routine.name)
-                .font(.body)
-                .lineLimit(1)
-                .truncationMode(.tail)
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .contentShape(.rect)
+            HStack(spacing: 8) {
+                Text(routine.name)
+                    .font(.body)
+                    .lineLimit(1)
+                    .truncationMode(.tail)
+
+                // The routine's own number, such as a weight, beside its name.
+                if let value = routine.valueDescription(locale: locale) {
+                    Text(value)
+                        .font(.subheadline)
+                        .monospacedDigit()
+                        .foregroundStyle(.secondary)
+                        .lineLimit(1)
+                        .fixedSize()
+                        .layoutPriority(1)
+                }
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .contentShape(.rect)
         }
         .buttonStyle(.plain)
         .accessibilityHint(Text("Shows the routine's details.", comment: "VoiceOver hint for the routine name"))
     }
 
-    private var weekStripButton: some View {
-        Button(action: advanceToday) {
-            HStack(spacing: RoutineRowMetrics.squareSpacing) {
-                ForEach(week, id: \.self) { day in
-                    let key = DayKey(day)
+    private func weekStripButton(counts: [Int: Int]) -> some View {
+        let color = routine.color
+
+        // Today's square records a repetition; every other square opens the
+        // routine, where that day can be filled in.
+        return HStack(spacing: RoutineRowMetrics.squareSpacing) {
+            ForEach(week, id: \.self) { key in
+                let isToday = key == today && !isShowingPastWeek
+                Button(action: isToday ? advanceToday : onOpenDetail) {
                     DaySquare(
-                        progress: routine.progress(on: key),
-                        color: routine.color,
+                        progress: routine.progress(forCount: counts[key.value] ?? 0),
+                        color: color,
                         isToday: key == today,
                         isFuture: key > today,
                         side: squareSide,
                         pulseTrigger: tapCount
                     )
-                }
-            }
-            .contentShape(.rect)
-        }
-        .buttonStyle(.plain)
-        .accessibilityLabel(Text("This week", comment: "VoiceOver label for the week of day squares"))
-        .accessibilityValue(progressDescription)
-        .accessibilityHint(
-            Text(
-                "Records one repetition for today. Tap again once the daily target is met to clear today.",
-                comment: "VoiceOver hint for the routine row"
-            )
-        )
-    }
-
-    /// Reserves the play button's width for every routine, so a row without a
-    /// timer doesn't let its squares slide across.
-    @ViewBuilder private var playSlot: some View {
-        if routine.isTimed {
-            Button(action: onStartTimer) {
-                Image(systemName: "play.circle.fill")
-                    .font(.title3)
-                    .foregroundStyle(routine.color)
-                    .frame(width: RoutineRowMetrics.playSlotWidth, height: 36)
                     .contentShape(.rect)
+                }
+                .buttonStyle(.plain)
             }
-            .buttonStyle(.plain)
-            .accessibilityLabel(Text("Start timer for \(routine.name)", comment: "VoiceOver label for the play button"))
-        } else {
-            Color.clear
-                .frame(width: RoutineRowMetrics.playSlotWidth, height: 1)
-                .accessibilityHidden(true)
+        }
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(
+            isShowingPastWeek
+                ? Text("Selected week", comment: "VoiceOver label for the day squares while an earlier week is shown")
+                : Text("This week", comment: "VoiceOver label for the week of day squares")
+        )
+        .accessibilityValue(progressDescription(counts: counts))
+        .accessibilityHint(
+            isShowingPastWeek
+                ? Text("Shows the routine's details.", comment: "VoiceOver hint for the day squares while an earlier week is shown")
+                : Text(
+                    "Records one repetition for today. Tap again once the daily target is met to clear today.",
+                    comment: "VoiceOver hint for the routine row"
+                )
+        )
+        .accessibilityAddTraits(.isButton)
+        .accessibilityAction {
+            if isShowingPastWeek { onOpenDetail() } else { advanceToday() }
         }
     }
 
     /// Today's progress followed by the week's, so one focus gives VoiceOver
     /// both what the tap will change and the context the squares convey visually.
-    private var progressDescription: Text {
-        let done = routine.completedCount(on: today)
+    private func progressDescription(counts: [Int: Int]) -> Text {
         let target = routine.dailyTarget
-        let complete = week.count { routine.isFullyComplete(on: DayKey($0)) }
+        let done = counts[today.value] ?? 0
+        let complete = week.count { (counts[$0.value] ?? 0) >= target }
 
         if target > 1 {
             return Text(
@@ -117,26 +151,48 @@ struct RoutineRow: View {
     }
 
     private func advanceToday() {
+        guard !isShowingPastWeek else {
+            onOpenDetail()
+            return
+        }
         RoutineStore.advance(routine, on: today, in: context)
         tapCount += 1
+        #if os(iOS)
+        // The routine just tapped is the one the Lock Screen follows.
+        RoutineStatusActivity.show(routine, destination: destination)
+        #endif
     }
 }
 
 /// The initials of the week, sitting above the routines' square columns.
 ///
 /// Mirrors `RoutineRow`'s layout exactly — a flexible leading column where the
-/// name goes, then one cell per square, then the reserved play slot — so the
-/// letters land over the columns they label.
+/// name goes, then one cell per square — so the letters land over the columns
+/// they label.
+///
+/// In All, where routines are grouped by list as in Reminders, the leading
+/// column carries the list's name in its colour.
 struct WeekdayHeader: View {
     let week: [Date]
     let today: DayKey
+    var title: Text?
+    var titleColor: Color = .primary
 
     @Environment(\.locale) private var locale
     @ScaledMetric(relativeTo: .caption2) private var squareSide = RoutineRowMetrics.squareSide
 
     var body: some View {
         HStack(spacing: RoutineRowMetrics.columnSpacing) {
-            Spacer(minLength: 0)
+            if let title {
+                title
+                    .font(.title3.weight(.bold))
+                    .foregroundStyle(titleColor)
+                    .lineLimit(1)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .accessibilityAddTraits(.isHeader)
+            } else {
+                Spacer(minLength: 0)
+            }
 
             HStack(spacing: RoutineRowMetrics.squareSpacing) {
                 ForEach(week, id: \.self) { day in
@@ -147,12 +203,9 @@ struct WeekdayHeader: View {
                         .frame(width: squareSide)
                 }
             }
-
-            Color.clear
-                .frame(width: RoutineRowMetrics.playSlotWidth, height: 1)
+            // The full day names would be read out seven times before every
+            // screen of routines; each square already carries its own date.
+            .accessibilityHidden(true)
         }
-        // The full day names would be read out seven times before every screen
-        // of routines; each square already carries its own date.
-        .accessibilityHidden(true)
     }
 }

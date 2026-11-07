@@ -96,10 +96,19 @@ struct RoutineHistoryCalendar: View {
     // MARK: - Grid
 
     private var monthGrid: some View {
+        let cells = cells
+        let todayKey = DayKey(Date(), calendar: calendar)
+        // One pass over the history for the whole month, rather than a search
+        // for each of its days.
+        let counts = routine.completionCounts(
+            from: cells.lazy.compactMap { $0 }.first.map { DayKey($0, calendar: calendar) } ?? todayKey,
+            through: cells.last.flatMap { $0 }.map { DayKey($0, calendar: calendar) } ?? todayKey
+        )
+
         // Eager, not lazy: this sits in a form row. See `FixedColumnGrid`.
-        FixedColumnGrid(items: cells, columns: 7) { day in
+        return FixedColumnGrid(items: cells, columns: 7) { day in
             if let day {
-                cell(for: day)
+                cell(for: day, todayKey: todayKey, counts: counts)
             } else {
                 // Keeps the first of the month under the right weekday.
                 Color.clear
@@ -122,34 +131,34 @@ struct RoutineHistoryCalendar: View {
         return Array(repeating: nil, count: leadingBlanks) + days
     }
 
-    @ViewBuilder private func cell(for day: Date) -> some View {
+    @ViewBuilder private func cell(for day: Date, todayKey: DayKey, counts: [Int: Int]) -> some View {
         let key = DayKey(day, calendar: calendar)
-        let todayKey = DayKey(Date(), calendar: calendar)
         let isFuture = key > todayKey
+        let progress = routine.progress(forCount: counts[key.value] ?? 0)
 
         // Future days can't be recorded, so they stay inert even in edit mode.
         if isEditable, !isFuture {
             Button {
                 record(on: key)
             } label: {
-                cellContent(day: day, key: key, isToday: key == todayKey, isFuture: false)
+                cellContent(day: day, progress: progress, isToday: key == todayKey, isFuture: false)
             }
             .buttonStyle(.plain)
             .accessibilityHint(Text("Records a repetition for this day.", comment: "VoiceOver hint for an editable history day"))
         } else {
-            cellContent(day: day, key: key, isToday: key == todayKey, isFuture: isFuture)
+            cellContent(day: day, progress: progress, isToday: key == todayKey, isFuture: isFuture)
         }
     }
 
-    private func cellContent(day: Date, key: DayKey, isToday: Bool, isFuture: Bool) -> some View {
-        let progress = routine.progress(on: key)
+    private func cellContent(day: Date, progress: Double, isToday: Bool, isFuture: Bool) -> some View {
+        let color = routine.color
 
         return ZStack {
             RoundedRectangle(cornerRadius: 6, style: .continuous)
                 .fill(Color.primary.opacity(isFuture ? 0.04 : 0.08))
 
             BottomFillShape(fraction: progress)
-                .fill(routine.color)
+                .fill(color)
                 .animation(.bouncy(duration: 0.4, extraBounce: 0.2), value: progress)
 
             Text(day.formatted(.dateTime.day().locale(locale)))
@@ -161,7 +170,7 @@ struct RoutineHistoryCalendar: View {
         .clipShape(RoundedRectangle(cornerRadius: 6, style: .continuous))
         .overlay {
             RoundedRectangle(cornerRadius: 6, style: .continuous)
-                .strokeBorder(isToday ? routine.color : .clear, lineWidth: 1.5)
+                .strokeBorder(isToday ? color : .clear, lineWidth: 1.5)
         }
         .aspectRatio(1, contentMode: .fit)
         .accessibilityElement(children: .ignore)

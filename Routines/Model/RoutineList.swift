@@ -10,9 +10,10 @@ import SwiftUI
 /// routine belongs to exactly one list, and the lists are independent of each
 /// other.
 ///
-/// This replaces the earlier free-form tags. Tags let a routine sit in several
-/// groups at once, which made "start a workout for this group" ambiguous and
-/// gave the main screen nothing to be a list *of*.
+/// A smart list is the exception, as in Reminders: it has a `smartTag` and,
+/// instead of members, shows every routine carrying that tag. Tags cut across
+/// lists, so a routine stays in its one list while also appearing in any
+/// number of smart lists' views — but only ever through its single tag.
 @Model
 final class RoutineList {
     var name: String = ""
@@ -26,6 +27,11 @@ final class RoutineList {
     /// Reminders shows pinned lists, rather than in the list below.
     var isPinned: Bool = false
 
+    /// Set for a smart list: the tag whose routines it gathers. A smart list
+    /// owns no routines of its own — it shows every routine carrying the tag,
+    /// whichever list that routine belongs to. `nil` for an ordinary list.
+    var smartTag: String?
+
     var createdAt: Date = Date()
 
     /// Nullify rather than cascade: deleting a list shouldn't take a routine's
@@ -34,8 +40,9 @@ final class RoutineList {
     @Relationship(deleteRule: .nullify, inverse: \Routine.list)
     var routines: [Routine]?
 
-    /// Present only so `WorkoutSession.list` has an inverse. CloudKit refuses
-    /// to load a store containing a one-directional relationship.
+    /// Present only so the retired `WorkoutSession.list` has an inverse.
+    /// CloudKit refuses to load a store containing a one-directional
+    /// relationship.
     @Relationship(deleteRule: .nullify, inverse: \WorkoutSession.list)
     var workoutSessions: [WorkoutSession]?
 
@@ -71,5 +78,16 @@ extension RoutineList {
 
     var routineCount: Int {
         routines?.count ?? 0
+    }
+
+    var isSmart: Bool {
+        smartTag != nil
+    }
+
+    /// How many routines the list shows. A smart list has no members of its
+    /// own, so it counts the routines that carry its tag.
+    func routineCount(among allRoutines: [Routine]) -> Int {
+        guard isSmart else { return routineCount }
+        return allRoutines.count { $0.belongs(to: self) }
     }
 }

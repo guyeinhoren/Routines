@@ -18,7 +18,7 @@ import Foundation
 /// The widget draws the countdown itself from `endDate`, so the app only has
 /// to update the activity when the timer is paused, resumed or finished — not
 /// every second.
-struct RoutineTimerActivityAttributes: ActivityAttributes {
+nonisolated struct RoutineTimerActivityAttributes: ActivityAttributes {
     struct ContentState: Codable, Hashable {
         /// When the countdown reaches zero, while it's running. `nil` while
         /// paused or finished.

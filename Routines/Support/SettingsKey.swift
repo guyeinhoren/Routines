@@ -11,9 +11,6 @@ import Foundation
 /// what makes the switches appear under Routines in the Settings app. The Mac
 /// reads and writes the same keys from its own Settings window.
 enum SettingsKey {
-    /// Whether ending a workout writes an event to the person's calendar.
-    static let syncWorkoutsToCalendar = "syncWorkoutsToCalendar"
-
     /// Whether a finished timer counts as one completed repetition.
     static let timerCountsAsCompletion = "timerCountsAsCompletion"
 
@@ -23,6 +20,9 @@ enum SettingsKey {
 
     /// Whether the screen stays on while a routine's timer is running.
     static let keepScreenOnDuringTimer = "keepScreenOnDuringTimer"
+
+    /// Whether the routine last tapped follows along as a Live Activity.
+    static let showRoutineLiveActivity = "showRoutineLiveActivity"
 
     /// The list that was open when the app was last left, so the next launch
     /// reopens it. Not a preference, so it has no entry in `Settings.bundle`.
@@ -42,10 +42,10 @@ enum SettingsKey {
     /// pane is actually opened, so the app cannot rely on them being present.
     static func registerDefaults() {
         UserDefaults.standard.register(defaults: [
-            syncWorkoutsToCalendar: false,
             timerCountsAsCompletion: true,
             timerSound: TimerSound.gentle.rawValue,
             keepScreenOnDuringTimer: false,
+            showRoutineLiveActivity: true,
             hasSeenWelcome: false,
             showWelcomeAgain: false,
         ])
